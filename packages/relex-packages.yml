@@ -1,0 +1,109 @@
+generated: '2026-08-26'
+method: searched
+source: registry.npmjs.org, pypi.org, rubygems.org, crates.io, api.nuget.org, search.maven.org,
+  proxy.golang.org, https://github.com/relex, https://www.relexsolutions.com/integrations/
+package_count: 0
+official_sdk_count: 0
+summary: >-
+  RELEX Solutions publishes NO first-party client SDK for either of its APIs, in any language, on
+  any package registry. This is a genuine, checked zero, not an unsearched gap — and it is
+  consistent with how RELEX positions the surface: integration is delivered as a project
+  (Managed Integration, SAP Connector, Batch API over Azure Blob/SFTP, Snowflake data sharing)
+  rather than as a developer-self-serve library.
+packages: []
+searched:
+- registry: npm
+  query: relex
+  result: no first-party package. The name `relex` (0.2.15, published 2015-03-21) belongs to an
+    unrelated third-party web-metrics tool at github.com/bakunin95/relex. No @relex or
+    @relexsolutions scope exists.
+  version: null
+  published: null
+- registry: pypi
+  queries:
+  - relex
+  - relex-api
+  - relexsolutions
+  result: >-
+    `relex` (0.1.1) exists but is a third-party PyTorch relation-extraction library by Ali NCIBI
+    (github.com/ylaxor/relex) — NOT RELEX Solutions. `relex-api` and `relexsolutions` are both 404.
+  version: null
+  published: null
+- registry: rubygems
+  result: no first-party package found
+  version: null
+  published: null
+- registry: crates.io
+  result: no first-party package found
+  version: null
+  published: null
+- registry: nuget
+  result: no first-party package found
+  version: null
+  published: null
+- registry: maven-central
+  result: no first-party package found
+  version: null
+  published: null
+- registry: pkg.go.dev
+  result: >-
+    RELEX's GitHub org publishes Go infrastructure libraries (gotils, slog-agent, fluentlib,
+    datadoglib, prometheus-expvar-proxy, aini) that ARE first-party and ARE importable, but none
+    of them is a client for the RELEX Data API or Monitoring API — they are the internal
+    monitoring/logging toolchain, open-sourced. Recorded here so a future round does not
+    misclassify them as SDKs.
+  version: null
+  published: null
+reference_clients:
+- name: monitoring-api-demo
+  repo: https://github.com/relex/monitoring-api-demo
+  language: Python
+  official: true
+  registry: null
+  version: null
+  published: '2025-01-17'
+  published_basis: last push to the default branch (GitHub API)
+  distribution: source only — not published to PyPI, not packaged, no setup.py/pyproject
+  contents:
+  - file_events.py
+  - job_events.py
+  - requirements.txt
+  note: >-
+    RELEX's own README is explicit that this is not a library — "The application is not expected to
+    be run as-is, it is rather provided as a code sample." It is the ONLY first-party API client
+    code RELEX publishes, and it covers the Monitoring API only. It does, usefully, hard-code the
+    real production base URL (https://us.monitor.relexsolutions.com/api/v1) and the real RELEX
+    Identity token endpoint, which is how the Monitoring API's auth topology was confirmed.
+  counts_as_sdk: false
+github_org:
+  url: https://github.com/relex
+  public_repos: 18
+  first_party_active:
+  - name: gotils
+    language: Go
+    last_push: '2026-01-02'
+    description: Small libraries and build scripts used in RELEX Monitoring & Logging
+  - name: terraform-provider-pbkdf2
+    last_push: '2025-11-20'
+  - name: slog-agent
+    language: Go
+    last_push: '2025-04-23'
+    description: High-performance log agent/processor used with fluentd
+  - name: fluentlib
+    language: Go
+    last_push: '2024-05-16'
+  - name: datadoglib
+    language: Go
+    last_push: '2024-07-01'
+  - name: prometheus-expvar-proxy
+    language: Go
+    last_push: '2024-08-16'
+  - name: aini
+    language: Go
+    last_push: '2024-07-29'
+    description: Go library for parsing Ansible inventory files
+  - name: json-diff-react
+    language: TypeScript
+    last_push: '2023-03-20'
+  note: The org is genuinely RELEX's and genuinely active, but its output is infrastructure and
+    observability tooling, not API client libraries.

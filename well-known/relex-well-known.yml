@@ -1,0 +1,166 @@
+generated: '2026-08-26'
+method: probed
+source: live GET of /.well-known/* on every RELEX host named by apis.yml baseURL, the OpenAPI
+  servers[] blocks, and the RELEX Identity token hosts referenced by the oauth2 securitySchemes
+note: >-
+  RELEX serves no /.well-known/* document from its marketing host (www.relexsolutions.com) or
+  from either API host (*.rest.relexsolutions.com, *.monitor.relexsolutions.com) — every path
+  there returns a real 404. The only /.well-known/* documents RELEX publishes are OpenID Connect
+  discovery documents on the RELEX Identity hosts, and those are genuine: three per region
+  (root issuer, the restapi_prod authority the Data API's oauth2 tokenUrl points at, and the
+  monitoring_api_prod authority the Monitoring API's tokenUrl points at). CAUTION FOR FUTURE
+  RUNS - the RELEX Identity hosts answer HTTP 200 with an HTML "Relex Identity" error page for
+  EVERY unknown /.well-known/* path, including security.txt, api-catalog, oauth-authorization-server,
+  oauth-protected-resource, agent-card.json and agent.json. Those 200s are SPA/error shells, not
+  documents, and are recorded below as misses. No security.txt, no api-catalog and no A2A agent
+  card exists on any RELEX host.
+hosts:
+- host: identity.prod-eu.prod.cc.relexsolutions.com
+  documents:
+  - path: /.well-known/openid-configuration
+    status: 200
+    file: relex-identity-eu-openid-configuration.json
+  - path: /login/restapi_prod/.well-known/openid-configuration
+    status: 200
+    file: relex-identity-eu-restapi-prod-openid-configuration.json
+  - path: /monitoring_api_prod/.well-known/openid-configuration
+    status: 200
+    file: relex-identity-eu-monitoring-api-prod-openid-configuration.json
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    file: null
+    note: HTML "Relex Identity" error shell, not a document — treated as a miss
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    file: null
+    note: HTML "Relex Identity" error shell, not a document — treated as a miss
+  - path: /.well-known/security.txt
+    status: 200
+    file: null
+    note: HTML "Relex Identity" error shell, not a document — treated as a miss
+  - path: /.well-known/api-catalog
+    status: 200
+    file: null
+    note: HTML "Relex Identity" error shell, not a document — treated as a miss
+  - path: /.well-known/agent-card.json
+    status: 200
+    file: null
+    note: HTML "Relex Identity" error shell, not an AgentCard — treated as a miss
+  - path: /.well-known/agent.json
+    status: 200
+    file: null
+    note: HTML "Relex Identity" error shell, not an AgentCard — treated as a miss
+- host: identity.prod-us.prod.cc.relexsolutions.com
+  documents:
+  - path: /.well-known/openid-configuration
+    status: 200
+    file: relex-identity-us-openid-configuration.json
+  - path: /login/restapi_prod/.well-known/openid-configuration
+    status: 200
+    file: relex-identity-us-restapi-prod-openid-configuration.json
+  - path: /monitoring_api_prod/.well-known/openid-configuration
+    status: 200
+    file: relex-identity-us-monitoring-api-prod-openid-configuration.json
+  - path: /.well-known/security.txt
+    status: 200
+    file: null
+    note: HTML "Relex Identity" error shell, not a document — treated as a miss
+  - path: /.well-known/api-catalog
+    status: 200
+    file: null
+    note: HTML "Relex Identity" error shell, not a document — treated as a miss
+  - path: /.well-known/agent-card.json
+    status: 200
+    file: null
+    note: HTML "Relex Identity" error shell, not an AgentCard — treated as a miss
+- host: www.relexsolutions.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/openid-configuration
+    status: 404
+    file: null
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null
+  - path: /.well-known/agent.json
+    status: 404
+    file: null
+- host: eu.rest.relexsolutions.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/openid-configuration
+    status: 404
+    file: null
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null
+  - path: /.well-known/agent.json
+    status: 404
+    file: null
+- host: uat-eu.rest.relexsolutions.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null
+  - path: /.well-known/agent.json
+    status: 404
+    file: null
+- host: eu.monitor.relexsolutions.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/openid-configuration
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null
+  - path: /.well-known/agent.json
+    status: 404
+    file: null
+- host: us.monitor.relexsolutions.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null
+  - path: /.well-known/agent.json
+    status: 404
+    file: null

@@ -1,0 +1,114 @@
+generated: '2026-08-26'
+method: searched
+source: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+derived_from:
+- openapi/relex-data-api-openapi.json
+- openapi/relex-monitoring-api-openapi.json
+versioning:
+  scheme: semver
+  spec: https://semver.org/spec/v2.0.0.html
+  current_version:
+  - api: RELEX Data API
+    version: v4.28.3
+    source: openapi/relex-data-api-openapi.json (info.version)
+    caveat: >-
+      This number is customer-specific by design. The published reference is titled "RELEX Data API
+      for Example Customer" and RELEX states the API version is the SUM of a shared Core version
+      and a per-customer Data model version, so a given customer's number will differ.
+  - api: RELEX Monitoring API
+    version: 1.24.0
+    source: openapi/relex-monitoring-api-openapi.json (info.version)
+  in_url: false
+  in_header: false
+  version_discovery_endpoint: /meta/version
+  version_discovery_operation_id: GetVersion
+  composition:
+    core_version: API semantics and usage patterns — authorization, payload formats, request and
+      response details. Shared across customers.
+    data_model_version: standard interfaces, payload schemas, and the bespoke resources and fields
+      configured for one customer. Per customer.
+    rule: 'API version = core version + data model version, summed component-wise (core 1.2.3 +
+      data model 4.3.2 = API version 5.5.5). Suffixes are concatenated.'
+  concurrency: One environment hosts exactly one version at a time. Different environments (for
+    example user-acceptance-test and production) may run different versions concurrently.
+deprecation_policy:
+  published: true
+  url: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+  section: 'API version → Semantic versioning → Version compatibility and deprecation'
+  summary: >-
+    RELEX commits to additive, non-breaking evolution: new capability arrives as new resources,
+    new fields or new features, and clients may ignore anything they did not opt into. Breaking
+    changes require a new MAJOR core version and are gated behind a feature flag that defaults to
+    the EXISTING behaviour.
+  migration_window: 3 months
+  migration_window_stated: true
+  migration_detail: >-
+    "The customer has three (3) months to adapt to the upcoming version change before the feature
+    flag is automatically made to follow the new behavior. Upgrade instructions are provided."
+  exceptions:
+  - trigger: critical security issue
+    behaviour: fixed immediately, without a feature-flag window; the vulnerable functionality may
+      be disabled until a proper fix ships, and clients must adapt quickly
+  - trigger: changes to customer data models
+    behaviour: visible immediately and never behind a feature flag
+  sunset_header: false
+  deprecation_header: false
+  rfc8594: false
+  rfc8594_note: >-
+    No Sunset or Deprecation response headers are documented or declared in either OpenAPI, so the
+    3-month window is communicated out of band (through the implementation team and upgrade
+    instructions), not on the wire. An automated client cannot detect an impending change from a
+    response.
+deprecated_operations:
+  count: 0
+  note: 'No operation in either published OpenAPI carries a `deprecated` flag set to true.'
+status_page:
+  published: true
+  url: https://status.relexsolutions.com/
+  platform: Atlassian Statuspage
+  public: false
+  access: >-
+    The status page exists and resolves, but it is a PRIVATE Statuspage — https://status.relexsolutions.com/
+    302s to https://status.relexsolutions.com/access/login and requires a customer login. There is
+    no anonymous incident history, component list, RSS/Atom feed or JSON summary endpoint, so an
+    agent or a prospective integrator cannot read RELEX availability without an account.
+  probed: '2026-08-26'
+  http_status: 200
+  effective_url: https://status.relexsolutions.com/access/login
+health_endpoints:
+- api: RELEX Data API
+  path: /meta/health
+  operation_id: GetHealth
+  auth_required: true
+- api: RELEX Monitoring API
+  path: /api/v{N}/health
+  auth_required: true
+- api: RELEX Monitoring API (service root)
+  url: https://us.monitor.relexsolutions.com/
+  auth_required: false
+  probed: '2026-08-26'
+  http_status: 200
+  observed_body_shape: '{"agents":{},"now":"<timestamp>","status":"ok"}'
+  note: The Monitoring API service root answers anonymously with a status document. It is the only
+    unauthenticated liveness signal RELEX exposes.
+sla:
+  published: false
+  note: No public SLA, uptime target or credit schedule. Availability commitments are contractual.
+disaster_recovery:
+  model: active / hot-standby, DNS-based traffic load balancer
+  source: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+environments:
+- name: user-acceptance-test
+  host_pattern: uat-{geography}.rest.relexsolutions.com
+- name: production
+  host_pattern: '{geography}.rest.relexsolutions.com'
+regions:
+- eu
+- us
+changelog:
+  published: false
+  note: >-
+    No public, dated changelog or release-notes page exists for either API. Version history sits
+    inside the RELEX Developer Portal at docs.relexsolutions.com, which requires an Auth0 login.
+    Because RELEX version numbers are partly per-customer, a shared public changelog would be only
+    partially meaningful — but the Core half of the version is shared and is not published.

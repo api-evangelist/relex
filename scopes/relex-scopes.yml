@@ -1,0 +1,183 @@
+generated: '2026-08-26'
+method: searched
+source: https://identity.prod-eu.prod.cc.relexsolutions.com/.well-known/openid-configuration
+docs: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+derived_from:
+- openapi/relex-data-api-openapi.json
+- openapi/relex-monitoring-api-openapi.json
+- well-known/relex-identity-eu-openid-configuration.json
+note: >-
+  RELEX publishes no scopes/permissions reference page. The authoritative public list is the
+  `scopes_supported` array of RELEX Identity's own OpenID Connect discovery documents, which are
+  served anonymously and are identical across all three authorities (root, /login/restapi_prod,
+  /monitoring_api_prod) and both regions. That list is far richer than the contracts: the Data API
+  declares ONE scope, the Monitoring API declares NONE, while RELEX Identity advertises 51.
+  Scopes are granted per client during provisioning; there is no self-service consent screen for
+  the client-credentials clients these APIs use.
+schemes:
+- name: OAuth2
+  api: RELEX Data API
+  source: openapi/relex-data-api-openapi.json
+  flow: clientCredentials
+  tokenUrl: https://identity.prod-eu.prod.cc.relexsolutions.com/login/restapi_prod/connect/token
+  tokenUrl_us: https://identity.prod-us.prod.cc.relexsolutions.com/login/restapi_prod/connect/token
+  declared_scopes:
+  - openid_api
+  description: The RELEX Data API uses OAuth 2 with the client credentials flow.
+- name: oauth2
+  api: RELEX Monitoring API
+  source: openapi/relex-monitoring-api-openapi.json
+  flow: clientCredentials
+  tokenUrl: https://identity.prod-eu.prod.cc.relexsolutions.com/monitoring_api_prod/connect/token
+  tokenUrl_us: https://identity.prod-us.prod.cc.relexsolutions.com/monitoring_api_prod/connect/token
+  declared_scopes: []
+  gap: >-
+    The Monitoring API's securityScheme declares an EMPTY scopes map, so the contract alone does
+    not tell a client what to request. RELEX Identity advertises four environment-scoped monitoring
+    scopes (restapi_prod_monitoring, restapi_uat_monitoring, restapi_test_monitoring,
+    restapi_dev_monitoring) that are almost certainly the ones this API expects.
+scope_count: 51
+scopes:
+- scope: openid_api
+  description: Internal use
+  declared_in: openapi/relex-data-api-openapi.json
+  flows:
+  - clientCredentials
+  note: The only scope either OpenAPI names. RELEX's own description of it is literally
+    "Internal use", which tells an integrator nothing.
+- scope: restapi_prod_monitoring
+  group: monitoring
+  description: Monitoring access to the production REST API environment (inferred from the name;
+    RELEX publishes no description).
+- scope: restapi_uat_monitoring
+  group: monitoring
+- scope: restapi_test_monitoring
+  group: monitoring
+- scope: restapi_dev_monitoring
+  group: monitoring
+- scope: openid
+  group: oidc-standard
+- scope: profile
+  group: oidc-standard
+- scope: email
+  group: oidc-standard
+- scope: offline_access
+  group: oidc-standard
+- scope: roles
+  group: identity
+- scope: tenant
+  group: identity
+- scope: groups
+  group: identity
+- scope: email-relex-saas
+  group: identity
+- scope: automation
+  group: identity
+- scope: healthcheck
+  group: platform
+- scope: scimhost
+  group: provisioning
+  note: >-
+    Indicates a SCIM user-provisioning surface exists inside the platform. No SCIM base URL,
+    /ServiceProviderConfig, /Schemas or urn:ietf:params:scim:schemas:* URN is published anywhere
+    public — see conformance/relex-conformance.yml.
+- scope: users:read
+  group: administration
+- scope: tenants:read
+  group: administration
+- scope: tenants:write
+  group: administration
+- scope: tenants:list
+  group: administration
+- scope: serviceproviders:read
+  group: administration
+- scope: serviceproviders:write
+  group: administration
+- scope: clients:read
+  group: administration
+- scope: clients:write
+  group: administration
+- scope: reports:read
+  group: administration
+- scope: AccountSettingsView
+  group: application-permission
+- scope: MasterDataView
+  group: application-permission
+- scope: SystemSettingsView
+  group: application-permission
+- scope: ReportView
+  group: application-permission
+- scope: ScmView
+  group: application-permission
+- scope: PerformanceDataEdit
+  group: application-permission
+- scope: ManualOrdersView
+  group: application-permission
+- scope: ManualOrdersEdit
+  group: application-permission
+- scope: StoreVersionView
+  group: application-permission
+- scope: FloorPlanView
+  group: space-planning
+- scope: FloorPlanEdit
+  group: space-planning
+- scope: FloorPlanAutomationView
+  group: space-planning
+- scope: FloorPlanDeliveryView
+  group: space-planning
+- scope: FloorPlanDeliveryEdit
+  group: space-planning
+- scope: PlanogramView
+  group: space-planning
+- scope: PlanogramEdit
+  group: space-planning
+- scope: PlanogramAssignmentView
+  group: space-planning
+- scope: PlanogramDeliverySpaceView
+  group: space-planning
+- scope: PlanogrammingDataIntegrationEdit
+  group: space-planning
+- scope: LocationLedAssignmentsView
+  group: space-planning
+- scope: MicroSpaceView
+  group: space-planning
+- scope: MicroSpaceEdit
+  group: space-planning
+- scope: MicroSpaceReviewsView
+  group: space-planning
+- scope: MicroSpaceWorkflowsView
+  group: space-planning
+- scope: GridEdit
+  group: space-planning
+- scope: PDREQ-7480
+  group: unknown
+  note: An internal ticket reference leaked into the public scope list. Recorded verbatim because
+    it is genuinely advertised; it is not a scope an integrator should request.
+identity_provider:
+  product: RELEX Identity (Duende/IdentityServer-family)
+  issuers:
+  - https://identity.prod-eu.prod.cc.relexsolutions.com
+  - https://identity.prod-eu.prod.cc.relexsolutions.com/login/restapi_prod
+  - https://identity.prod-eu.prod.cc.relexsolutions.com/monitoring_api_prod
+  - https://identity.prod-us.prod.cc.relexsolutions.com
+  - https://identity.prod-us.prod.cc.relexsolutions.com/login/restapi_prod
+  - https://identity.prod-us.prod.cc.relexsolutions.com/monitoring_api_prod
+  grant_types_supported:
+  - authorization_code
+  - client_credentials
+  - refresh_token
+  - implicit
+  - password
+  - urn:ietf:params:oauth:grant-type:device_code
+  - urn:openid:params:grant-type:ciba
+  - urn:ietf:params:oauth:grant-type:token-exchange
+  token_endpoint_auth_methods_supported:
+  - client_secret_basic
+  - client_secret_post
+  code_challenge_methods_supported:
+  - plain
+  - S256
+  note: >-
+    The discovery documents advertise the full IdentityServer grant surface, including implicit and
+    resource-owner password, which are discouraged by OAuth 2.1. That is the IdP's capability list,
+    not what these two APIs use — both APIs use client_credentials only.

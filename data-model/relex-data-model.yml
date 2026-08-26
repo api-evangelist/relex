@@ -1,0 +1,1255 @@
+# RELEX Data API entity graph - derived, see `method`
+generated: '2026-08-26'
+method: derived
+source: openapi/relex-data-api-openapi.json
+note: 'Derived mechanically from the RELEX Data API contract: every /data/* resource whose request body
+  wraps a data[] array of a component schema, plus the id-reference fields those schemas carry. RELEX
+  publishes no public object reference or ERD, and the object model is partly per-customer (the "Custom"
+  tag and the data-model half of the version number), so this graph describes the EXAMPLE CUSTOMER contract
+  RELEX publishes, not a universal RELEX schema.'
+identity_model:
+  surrogate_ids: false
+  note: 'There is no global id field and no id-prefix scheme. Records are keyed by BUSINESS keys - almost
+    every transactional and product-level entity is identified by the composite of `product` and `location`
+    (plus a date or timestamp where the record is time-series). That is what makes POST an upsert: re-POSTing
+    the same product+location+date overwrites in place. Only the four GET-able output resources (sales_forecasts,
+    order_proposals, workload driver forecasts) expose an {id} path parameter, and that id is the handle
+    the webhook payload carries.'
+  core_dimensions:
+  - product
+  - location
+  - supplier
+  - campaign
+  - chain
+hub_entities:
+- name: product
+  role: master-data dimension
+  referenced_by_count: 39
+  note: The single most-referenced field in the contract - 39 schemas carry a `product` reference.
+- name: location
+  role: master-data dimension
+  referenced_by_count: 43
+  note: Stores, distribution centres and other planning locations. The most-referenced field of all.
+- name: supplier
+  role: master-data dimension
+  referenced_by_count: 11
+- name: campaign
+  role: master-data dimension
+  referenced_by_count: 2
+  note: One of the few entities with an explicit DELETE operation.
+- name: chain
+  role: master-data dimension
+  referenced_by_count: 1
+entity_count: 70
+entities:
+- name: adjustment
+  domain: Transactions
+  resources:
+  - /data/transactions/adjustments
+  operations:
+  - PostAdjustments
+  field_count: 13
+  required_fields:
+  - type
+  - product
+  - location
+  - date
+  - quantity
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: balance
+  domain: Transactions
+  resources:
+  - /data/transactions/balances
+  operations:
+  - PostBalances
+  field_count: 7
+  required_fields:
+  - type
+  - product
+  - location
+  - date
+  - balance
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: batch_balance
+  domain: Transactions
+  resources:
+  - /data/transactions/batch_balances
+  operations:
+  - PostBatchBalances
+  field_count: 12
+  required_fields:
+  - type
+  - product
+  - location
+  - date
+  - balance
+  - estimated_date
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: daily_sale
+  domain: Transactions
+  resources:
+  - /data/transactions/daily_sales
+  operations:
+  - PostDailySales
+  field_count: 7
+  required_fields:
+  - date
+  - location
+  - product
+  - quantity
+  - type
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: dc_transaction
+  domain: Transactions
+  resources:
+  - /data/transactions/dc_transactions
+  operations:
+  - PostDcTransactions
+  field_count: 9
+  required_fields:
+  - product
+  - location
+  - date
+  - sales_orders_quantity
+  - estimated_date
+  - type
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: delivery
+  domain: Transactions
+  resources:
+  - /data/transactions/deliveries
+  operations:
+  - PostDeliveries
+  field_count: 14
+  required_fields:
+  - type
+  - product
+  - location
+  - date
+  - quantity
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: end_customer_transaction
+  domain: Transactions
+  resources:
+  - /data/transactions/end_customer_transactions
+  operations:
+  - PostEndCustomerTransactions
+  field_count: 15
+  required_fields:
+  - date
+  - product
+  - end_customer
+  - type
+  - sales_quantity
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+- name: footfall_count
+  domain: Transactions
+  resources:
+  - /data/transactions/footfall_counts
+  operations:
+  - PostFootfallCounts
+  field_count: 4
+  required_fields:
+  - date
+  - location
+  - time
+  - quantity
+  relationships:
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: inventory_check
+  domain: Transactions
+  resources:
+  - /data/transactions/inventory_checks
+  operations:
+  - PostInventoryChecks
+  field_count: 13
+  required_fields:
+  - type
+  - product
+  - location
+  - date
+  - quantity
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: lost_sale
+  domain: Transactions
+  resources:
+  - /data/transactions/lost_sales
+  operations:
+  - PostLostSales
+  field_count: 14
+  required_fields:
+  - type
+  - product
+  - location
+  - date
+  - quantity
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: open_purchase_order
+  domain: Transactions
+  resources:
+  - /data/transactions/open_purchase_orders
+  operations:
+  - PostOpenPurchaseOrders
+  field_count: 16
+  required_fields:
+  - type
+  - product
+  - location
+  - date
+  - quantity
+  - estimated_date
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: open_sales_order
+  domain: Transactions
+  resources:
+  - /data/transactions/open_sales_orders
+  operations:
+  - PostOpenSalesOrders
+  field_count: 14
+  required_fields:
+  - type
+  - product
+  - location
+  - date
+  - quantity
+  - estimated_date
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: order
+  domain: Transactions
+  resources:
+  - /data/transactions/orders
+  operations:
+  - PostOrders
+  field_count: 20
+  required_fields:
+  - product
+  - location
+  - date
+  - quantity
+  - estimated_date
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: retail_assortment
+  domain: Master data
+  resources:
+  - /data/master/assortments
+  operations:
+  - PostAssortments
+  field_count: 9
+  required_fields:
+  - code
+  - name
+  - merchandising_product_group_5
+  relationships: []
+- name: retail_barcode
+  domain: Master data
+  resources:
+  - /data/master/barcodes
+  operations:
+  - PostBarcodes
+  field_count: 4
+  required_fields:
+  - code
+  - product
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+- name: retail_batch_size
+  domain: Master data
+  resources:
+  - /data/master/batch_sizes
+  operations:
+  - DeleteBatchSizes
+  - PostBatchSizes
+  field_count: 13
+  required_fields:
+  - code
+  - product
+  - batch_size
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+- name: retail_bill_of_materials
+  domain: Master data
+  resources:
+  - /data/master/bills_of_materials
+  operations:
+  - PostBillsOfMaterials
+  field_count: 10
+  required_fields:
+  - end_product_code
+  - component_product_code
+  - quantity
+  relationships: []
+- name: retail_bracket
+  domain: Master data
+  resources:
+  - /data/master/brackets
+  operations:
+  - PostBrackets
+  field_count: 4
+  required_fields:
+  - code
+  - bracket_limit
+  - bracket_discount
+  - bracket_type
+  relationships: []
+- name: retail_campaign
+  domain: Master data
+  resources:
+  - /data/master/campaigns
+  operations:
+  - DeleteCampaigns
+  - PostCampaigns
+  field_count: 15
+  required_fields:
+  - code
+  - name
+  - start_date
+  - end_date
+  - campaign_class
+  relationships: []
+- name: retail_chain
+  domain: Master data
+  resources:
+  - /data/master/chains
+  operations:
+  - PostChains
+  field_count: 3
+  required_fields:
+  - code
+  - name
+  relationships: []
+- name: retail_closed_date
+  domain: Master data
+  resources:
+  - /data/master/closed_dates
+  operations:
+  - PostClosedDates
+  field_count: 5
+  required_fields:
+  - location
+  - date
+  relationships:
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: retail_cluster
+  domain: Master data
+  resources:
+  - /data/master/clusters
+  operations:
+  - PostClusters
+  field_count: 2
+  required_fields:
+  - code
+  relationships: []
+- name: retail_cluster_group
+  domain: Master data
+  resources:
+  - /data/master/cluster_groups
+  operations:
+  - PostClusterGroups
+  field_count: 4
+  required_fields:
+  - code
+  relationships: []
+- name: retail_cluster_group_cluster
+  domain: Master data
+  resources:
+  - /data/master/cluster_group_clusters
+  operations:
+  - PostClusterGroupClusters
+  field_count: 2
+  required_fields:
+  - cluster_group
+  - cluster
+  relationships: []
+- name: retail_constraint_group
+  domain: Master data
+  resources:
+  - /data/master/constraint_groups
+  operations:
+  - PostConstraintGroups
+  field_count: 13
+  required_fields:
+  - code
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: false
+  - type: belongs_to
+    target: supplier
+    via_field: supplier
+    required: false
+- name: retail_constraint_group_constraint
+  domain: Master data
+  resources:
+  - /data/master/constraint_group_constraints
+  operations:
+  - PostConstraintGroupConstraints
+  field_count: 6
+  required_fields:
+  - constraint_group
+  - date
+  relationships: []
+- name: retail_coordination_group
+  domain: Master data
+  resources:
+  - /data/master/coordination_groups
+  operations:
+  - PostCoordinationGroups
+  field_count: 21
+  required_fields:
+  - code
+  relationships: []
+- name: retail_coordination_group_bracket
+  domain: Master data
+  resources:
+  - /data/master/coordination_group_brackets
+  operations:
+  - PostCoordinationGroupBrackets
+  field_count: 2
+  required_fields:
+  - bracket
+  - coordination_group
+  relationships: []
+- name: retail_country
+  domain: Master data
+  resources:
+  - /data/master/countries
+  operations:
+  - PostCountries
+  field_count: 2
+  required_fields:
+  - code
+  - name
+  relationships: []
+- name: retail_date_specific_delivery
+  domain: Master data
+  resources:
+  - /data/master/date_specific_deliveries
+  operations:
+  - PostDateSpecificDeliveries
+  field_count: 6
+  required_fields:
+  - date
+  - product
+  - location
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: retail_delivery_schedule
+  domain: Master data
+  resources:
+  - /data/master/delivery_schedules
+  operations:
+  - PostDeliverySchedules
+  field_count: 29
+  required_fields:
+  - code
+  - name
+  - delivery_schedule
+  - delivery_time
+  relationships: []
+- name: retail_end_customer
+  domain: Master data
+  resources:
+  - /data/master/end_customers
+  operations:
+  - PostEndCustomers
+  field_count: 6
+  required_fields:
+  - code
+  - address
+  relationships: []
+- name: retail_floor_plan
+  domain: Master data
+  resources:
+  - /data/master/floor_plans
+  operations:
+  - PostFloorPlans
+  field_count: 4
+  required_fields:
+  - code
+  relationships: []
+- name: retail_location
+  domain: Master data
+  resources:
+  - /data/master/locations
+  operations:
+  - PostLocations
+  field_count: 23
+  required_fields:
+  - code
+  - name
+  relationships:
+  - type: belongs_to
+    target: chain
+    via_field: chain
+    required: false
+- name: retail_location_category_cluster_group_cluster
+  domain: Master data
+  resources:
+  - /data/master/location_category_cluster_group_clusters
+  operations:
+  - PostLocationCategoryClusterGroupClusters
+  field_count: 4
+  required_fields:
+  - location
+  - merchandising_product_group_5
+  - cluster_group
+  - cluster
+  relationships:
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: retail_location_category_space
+  domain: Master data
+  resources:
+  - /data/master/location_category_spaces
+  operations:
+  - PostLocationCategorySpaces
+  field_count: 14
+  required_fields:
+  - code
+  - location
+  - merchandising_product_group_5
+  - planogram_width
+  - number_of_bays
+  relationships:
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: retail_location_category_space_bay
+  domain: Master data
+  resources:
+  - /data/master/location_category_space_bays
+  operations:
+  - PostLocationCategorySpaceBays
+  field_count: 15
+  required_fields:
+  - code
+  - location
+  - merchandising_product_group_5
+  - bay_index
+  - location_category_space
+  relationships:
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: retail_location_category_space_bay_component
+  domain: Master data
+  resources:
+  - /data/master/location_category_space_bay_components
+  operations:
+  - PostLocationCategorySpaceBayComponents
+  field_count: 6
+  required_fields:
+  - code
+  - bay_index
+  - component_index
+  relationships: []
+- name: retail_location_supplier_delivery_schedule
+  domain: Master data
+  resources:
+  - /data/master/location_supplier_delivery_schedules
+  operations:
+  - DeleteLocationSupplierDeliverySchedules
+  - PostLocationSupplierDeliverySchedules
+  field_count: 3
+  required_fields:
+  - location
+  - supplier
+  - delivery_schedule
+  relationships:
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+  - type: belongs_to
+    target: supplier
+    via_field: supplier
+    required: true
+- name: retail_merchandising_product_group
+  domain: Master data
+  resources:
+  - /data/master/merchandising_product_groups
+  operations:
+  - PostMerchandisingProductGroups
+  field_count: 20
+  required_fields:
+  - code1
+  - name1
+  - code2
+  - name2
+  relationships: []
+- name: retail_opening_time
+  domain: Master data
+  resources:
+  - /data/master/opening_times
+  operations:
+  - PostOpeningTimes
+  field_count: 4
+  required_fields:
+  - location
+  - date
+  relationships:
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: retail_pre_pack_variant
+  domain: Master data
+  resources:
+  - /data/master/pre_pack_variants
+  operations:
+  - DeletePrePackVariants
+  - PostPrePackVariants
+  field_count: 3
+  required_fields:
+  - pre_pack_product_code
+  - variant_product_code
+  - variant_quantity
+  relationships: []
+- name: retail_price_calendar
+  domain: Master data
+  resources:
+  - /data/master/price_calendars
+  operations:
+  - PostPriceCalendars
+  field_count: 7
+  required_fields:
+  - code
+  - name
+  - start_date
+  - end_date
+  - sales_price
+  - sales_price_with_vat
+  - price_type
+  relationships: []
+- name: retail_product
+  domain: Master data
+  resources:
+  - /data/master/products
+  operations:
+  - PostProducts
+  field_count: 82
+  required_fields:
+  - code
+  - name
+  - group
+  - weight
+  - weight_unit
+  relationships:
+  - type: belongs_to
+    target: supplier
+    via_field: supplier
+    required: false
+- name: retail_product_class
+  domain: Master data
+  resources:
+  - /data/master/product_classes
+  operations:
+  - PostProductClasses
+  field_count: 4
+  required_fields:
+  - code
+  relationships: []
+- name: retail_product_end_customer
+  domain: Master data
+  resources:
+  - /data/master/product_end_customers
+  operations:
+  - PostProductEndCustomers
+  field_count: 2
+  required_fields:
+  - end_customer
+  - product
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+- name: retail_product_group
+  domain: Master data
+  resources:
+  - /data/master/product_groups
+  operations:
+  - PostProductGroups
+  field_count: 30
+  required_fields:
+  - code1
+  - name1
+  relationships: []
+- name: retail_product_location
+  domain: Master data
+  resources:
+  - /data/master/product_locations
+  operations:
+  - PostProductLocations
+  field_count: 26
+  required_fields:
+  - product
+  - location
+  - supplier
+  - purchase_price
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+  - type: belongs_to
+    target: supplier
+    via_field: supplier
+    required: true
+- name: retail_product_location_batch_size
+  domain: Master data
+  resources:
+  - /data/master/product_location_batch_sizes
+  operations:
+  - DeleteProductLocationBatchSizes
+  - PostProductLocationBatchSizes
+  field_count: 10
+  required_fields:
+  - product_batch_size
+  - product
+  - location
+  - valid
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: retail_product_location_campaign
+  domain: Master data
+  resources:
+  - /data/master/product_location_campaigns
+  operations:
+  - DeleteProductLocationCampaigns
+  - PostProductLocationCampaigns
+  field_count: 5
+  required_fields:
+  - product
+  - location
+  - campaign
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+  - type: belongs_to
+    target: campaign
+    via_field: campaign
+    required: true
+- name: retail_product_location_category
+  domain: Master data
+  resources:
+  - /data/master/product_location_categories
+  operations:
+  - PostProductLocationCategories
+  field_count: 3
+  required_fields:
+  - product
+  - location
+  - merchandising_product_group_5
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: retail_product_location_category_assortment
+  domain: Master data
+  resources:
+  - /data/master/product_location_category_assortments
+  operations:
+  - PostProductLocationCategoryAssortments
+  field_count: 12
+  required_fields:
+  - assortment
+  - product
+  - merchandising_product_group_5
+  - location
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: retail_product_location_constraint_group
+  domain: Master data
+  resources:
+  - /data/master/product_location_constraint_groups
+  operations:
+  - PostProductLocationConstraintGroups
+  field_count: 3
+  required_fields:
+  - product
+  - location
+  - constraint_group
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: retail_product_location_coordination_group
+  domain: Master data
+  resources:
+  - /data/master/product_location_coordination_groups
+  operations:
+  - PostProductLocationCoordinationGroups
+  field_count: 3
+  required_fields:
+  - product
+  - location
+  - coordination_group
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: retail_product_location_delivery_schedule
+  domain: Master data
+  resources:
+  - /data/master/product_location_delivery_schedules
+  operations:
+  - DeleteProductLocationDeliverySchedules
+  - PostProductLocationDeliverySchedules
+  field_count: 3
+  required_fields:
+  - product
+  - location
+  - delivery_schedule
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: retail_product_location_price_calendar
+  domain: Master data
+  resources:
+  - /data/master/product_location_price_calendars
+  operations:
+  - PostProductLocationPriceCalendars
+  field_count: 3
+  required_fields:
+  - price_calendar
+  - product
+  - location
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: retail_product_location_supplier
+  domain: Master data
+  resources:
+  - /data/master/product_location_suppliers
+  operations:
+  - PostProductLocationSuppliers
+  field_count: 28
+  required_fields:
+  - product
+  - location
+  - supplier
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+  - type: belongs_to
+    target: supplier
+    via_field: supplier
+    required: true
+- name: retail_product_location_supplier_replenishment_agreement
+  domain: Master data
+  resources:
+  - /data/master/product_location_supplier_replenishment_agreements
+  operations:
+  - PostProductLocationSupplierReplenishmentAgreements
+  field_count: 7
+  required_fields:
+  - product
+  - location
+  - supplier
+  - replenishment_agreement
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+  - type: belongs_to
+    target: supplier
+    via_field: supplier
+    required: true
+- name: retail_product_product_class
+  domain: Master data
+  resources:
+  - /data/master/product_product_classes
+  operations:
+  - PostProductProductClasses
+  field_count: 2
+  required_fields:
+  - product_class
+  - product
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+- name: retail_product_replacement_and_reference
+  domain: Master data
+  resources:
+  - /data/master/product_replacements_and_references
+  operations:
+  - DeleteProductReplacementsAndReferences
+  - PostProductReplacementsAndReferences
+  field_count: 6
+  required_fields:
+  - is_replacement
+  - old_product_code
+  - new_product_code
+  relationships: []
+- name: retail_replenishment_agreement
+  domain: Master data
+  resources:
+  - /data/master/replenishment_agreements
+  operations:
+  - PostReplenishmentAgreements
+  field_count: 13
+  required_fields:
+  - code
+  - name
+  - type
+  relationships: []
+- name: retail_supplier
+  domain: Master data
+  resources:
+  - /data/master/suppliers
+  operations:
+  - PostSuppliers
+  field_count: 7
+  required_fields:
+  - code
+  - name
+  relationships: []
+- name: retail_supplier_closure
+  domain: Master data
+  resources:
+  - /data/master/supplier_closures
+  operations:
+  - PostSupplierClosures
+  field_count: 3
+  required_fields:
+  - supplier
+  - date
+  - closed
+  relationships:
+  - type: belongs_to
+    target: supplier
+    via_field: supplier
+    required: true
+- name: retail_supplier_location
+  domain: Master data
+  resources:
+  - /data/master/supplier_locations
+  operations:
+  - PostSupplierLocations
+  field_count: 27
+  required_fields:
+  - location
+  - supplier
+  relationships:
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+  - type: belongs_to
+    target: supplier
+    via_field: supplier
+    required: true
+- name: retail_supplier_location_bracket
+  domain: Master data
+  resources:
+  - /data/master/supplier_location_brackets
+  operations:
+  - PostSupplierLocationBrackets
+  field_count: 3
+  required_fields:
+  - bracket
+  - location
+  - supplier
+  relationships:
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+  - type: belongs_to
+    target: supplier
+    via_field: supplier
+    required: true
+- name: retail_supplier_location_closure
+  domain: Master data
+  resources:
+  - /data/master/supplier_location_closures
+  operations:
+  - PostSupplierLocationClosures
+  field_count: 4
+  required_fields:
+  - location
+  - supplier
+  - date
+  - closed
+  relationships:
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+  - type: belongs_to
+    target: supplier
+    via_field: supplier
+    required: true
+- name: sale
+  domain: Transactions
+  resources:
+  - /data/transactions/sales
+  operations:
+  - PostSales
+  field_count: 30
+  required_fields:
+  - date
+  - product
+  - location
+  - time
+  - quantity
+  - receipt_code
+  - receipt_row_number
+  - receipt_timestamp
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: special_delivery
+  domain: Transactions
+  resources:
+  - /data/transactions/special_deliveries
+  operations:
+  - PostSpecialDeliveries
+  field_count: 12
+  required_fields:
+  - type
+  - product
+  - location
+  - date
+  - quantity
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: spoilage
+  domain: Transactions
+  resources:
+  - /data/transactions/spoilages
+  operations:
+  - PostSpoilages
+  field_count: 9
+  required_fields:
+  - type
+  - product
+  - location
+  - date
+  - quantity
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+- name: transfer
+  domain: Transactions
+  resources:
+  - /data/transactions/transfers
+  operations:
+  - PostTransfers
+  field_count: 14
+  required_fields:
+  - type
+  - product
+  - location
+  - date
+  - quantity
+  relationships:
+  - type: belongs_to
+    target: product
+    via_field: product
+    required: true
+  - type: belongs_to
+    target: location
+    via_field: location
+    required: true
+render: null

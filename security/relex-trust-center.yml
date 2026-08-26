@@ -1,0 +1,73 @@
+generated: '2026-08-26'
+method: searched
+probe: true
+source: https://www.relexsolutions.com/security-compliance/
+url: https://www.relexsolutions.com/privacy-trust-center/
+http_status: 200
+trust_center:
+  present: true
+  style: static policy pages, not a hosted trust portal
+  note: >-
+    RELEX runs no Vanta/Drata/SafeBase-style trust portal with downloadable, gated evidence. What
+    it publishes is a set of readable policy pages. Audit reports themselves (the SOC 2 report,
+    the ISO certificate) are not downloadable and are presumably obtained through sales or the
+    customer relationship.
+  pages:
+  - name: Security and compliance
+    url: https://www.relexsolutions.com/security-compliance/
+    status: 200
+  - name: Privacy trust center
+    url: https://www.relexsolutions.com/privacy-trust-center/
+    status: 200
+  - name: Information security FAQ
+    url: https://www.relexsolutions.com/policy/infosec-faq/
+    status: 200
+  - name: AI governance and trust at RELEX
+    url: https://www.relexsolutions.com/policy/ai-governance-trust-at-relex/
+    status: 200
+  - name: Vulnerability disclosure policy
+    url: https://www.relexsolutions.com/policy/vulnerability-disclosure/
+    status: 200
+  - name: Modern slavery statement
+    url: https://www.relexsolutions.com/policy/modern-slavery-statement/
+  - name: Whistleblowing channel
+    url: https://www.relexsolutions.com/policy/whistleblowing-channel/
+certifications:
+- name: ISO/IEC 27001:2013
+  scope: RELEX Inventory and Supply Chain software
+  evidence: 'Named on the security and compliance page: "To gain ISO 27001:2013 certification for
+    RELEX''s Inventory and Supply Chain software, we had to demonstrate a systematic and rigorous
+    approach to managing sensitive information."'
+  certificate_downloadable: false
+- name: SOC 2 (ISAE 3000)
+  detail: Type I and Type II reports completed
+  evidence: RELEX describes the ISAE 3000 SOC 2 standard as its assurance reporting standard and
+    states both Type I and Type II reports are complete.
+  report_downloadable: false
+- name: GDPR
+  detail: EU data protection programme
+  evidence: Named on the security and compliance page; RELEX is Helsinki-headquartered and offers
+    EU-resident environments (uat-eu / eu API hosts, identity.prod-eu identity authority).
+  note: A regulatory obligation rather than a certification, but published as part of the same
+    programme.
+not_found:
+- PCI DSS
+- HIPAA
+- FedRAMP
+- ISO 27017
+- ISO 27018
+- ISO 27701
+- TISAX
+- CSA STAR
+subprocessors:
+  published: false
+  note: >-
+    No subprocessor list was found, though at least two subprocessors are inferable from the API
+    documentation itself — Svix (webhook delivery) and Microsoft Azure (Blob Storage for the Batch
+    API; the developer portal runs on Azure Static Web Apps).
+data_residency:
+  regions:
+  - eu
+  - us
+  evidence: Both APIs publish per-region hosts and per-region RELEX Identity authorities, so
+    residency is selectable at the environment level.

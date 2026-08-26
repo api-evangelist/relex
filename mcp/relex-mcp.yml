@@ -1,0 +1,103 @@
+generated: '2026-08-26'
+method: derived
+source: openapi/relex-data-api-openapi.json, openapi/relex-monitoring-api-openapi.json,
+  https://www.relexsolutions.com/integrations/
+status: candidate
+deployment:
+  mode: none
+  endpoint: null
+  install: null
+  package: null
+  auth: unknown
+  verified: searched
+vendor_claim:
+  claimed: true
+  claim: >-
+    RELEX's integrations page lists "Model Context Protocol (MCP)" among its integration methods and
+    states RELEX has native MCP support "enabling agent-to-agent (A2A) and tool-to-platform
+    connectivity". RELEX also markets 16 named planning agents (Inventory Control, Order
+    Troubleshoot, Promotion Diagnostics, Forecast Review, Stress-Testing and others) at
+    /meet-the-agents/.
+  source: https://www.relexsolutions.com/integrations/
+  substantiated: false
+  gap: >-
+    NOTHING PUBLIC BACKS THE CLAIM. No MCP endpoint URL, no stdio package, no config snippet, no
+    tool list and no A2A agent card is published anywhere reachable. mcp.relexsolutions.com and
+    agent.relexsolutions.com do not resolve; /mcp on both API hosts returns a real 404;
+    /.well-known/agent-card.json and /.well-known/agent.json 404 on every RELEX host; there is no
+    @relex or @relexsolutions npm scope. Whatever MCP support exists is either inside the
+    customer-tenant product or documented only behind the Auth0-gated developer portal at
+    docs.relexsolutions.com. THE MODE IS THEREFORE `none` AND NO MCPServer POINTER IS WIRED INTO
+    apis.yml — an agent cannot reach a RELEX MCP server today, and recording one would assert an
+    agent surface that does not publicly exist.
+  probes:
+  - url: https://eu.rest.relexsolutions.com/mcp
+    status: 404
+  - url: https://eu.monitor.relexsolutions.com/mcp
+    status: 404
+  - host: mcp.relexsolutions.com
+    status: NXDOMAIN
+  - host: agent.relexsolutions.com
+    status: NXDOMAIN
+  - url: https://www.relexsolutions.com/.well-known/agent-card.json
+    status: 404
+candidate_tools:
+  note: >-
+    Derived from the published OpenAPI so a future round (or RELEX itself) has a concrete starting
+    point. Each tool inherits the parameters and requestBody of the operation it names. These are
+    CANDIDATES — RELEX ships none of them.
+  caution: >-
+    Only read-shaped operations are proposed as tools. The 72 POST upserts and 8 DELETEs are
+    deliberately excluded: writes are asynchronous (a 200 is acceptance, not success), have no
+    dry-run, and — for the entire transactional surface — no reversal operation. Exposing them as
+    agent tools without a confirmation step would be unsafe.
+  tools:
+  - tool: relex_get_version
+    rest: [GetVersion]
+    category: metadata
+    description: Report the current RELEX Data API version for this environment.
+  - tool: relex_get_health
+    rest: [GetHealth]
+    category: metadata
+    description: Check RELEX Data API health.
+  - tool: relex_list_ingestion_errors
+    rest: [GetErrors]
+    category: diagnostics
+    description: Fetch asynchronous ingestion errors by request_id, or by a start/end timestamp
+      window. Paged via page/per_page.
+  - tool: relex_list_sales_forecasts
+    rest: [list_GetSalesForecasts, get_GetSalesForecasts]
+    category: planning-output
+    description: Retrieve sales forecasts, or one forecast by id (the id a webhook notification
+      carries).
+  - tool: relex_list_order_proposals
+    rest: [list_GetOrderProposals, get_GetOrderProposals]
+    category: planning-output
+    description: Retrieve replenishment order proposals, or one by id.
+  - tool: relex_list_workload_driver_forecasts_day
+    rest: [list_GetWorkloadDriverForecastsDay, get_GetWorkloadDriverForecastsDay]
+    category: planning-output
+    description: Retrieve daily workload driver forecasts, or one by id.
+  - tool: relex_list_workload_driver_forecasts_quarter
+    rest: [list_GetWorkloadDriverForecastsQuarter, get_GetWorkloadDriverForecastsQuarter]
+    category: planning-output
+    description: Retrieve quarter workload driver forecasts, or one by id.
+  - tool: relex_list_file_events
+    rest: ['Monitoring API - GET /api/v{N}/{customer_id}/events/file']
+    category: monitoring
+    description: Check file upload/ingestion status for a customer environment.
+  - tool: relex_list_job_events
+    rest: ['Monitoring API - GET /api/v{N}/{customer_id}/events/job']
+    category: monitoring
+    description: Check planning job status for a customer environment.
+  - tool: relex_list_environments
+    rest: ['Monitoring API - GET /api/v{N}/{customer_id}/environments']
+    category: monitoring
+  - tool: relex_get_metrics
+    rest: ['Monitoring API - GET /api/v{N}/{customer_id}/metrics']
+    category: monitoring
+auth_model_if_built:
+  scheme: oauth2 client credentials against RELEX Identity
+  token_endpoint: 'https://identity.prod-{eu|us}.prod.cc.relexsolutions.com/login/restapi_prod/connect/token'
+  note: Every candidate tool requires a per-customer client id/secret issued by RELEX; there is no
+    anonymous path.

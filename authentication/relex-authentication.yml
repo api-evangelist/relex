@@ -1,0 +1,130 @@
+generated: '2026-08-26'
+method: searched
+source: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+docs: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+derived_from:
+- openapi/relex-data-api-openapi.json
+- openapi/relex-monitoring-api-openapi.json
+- well-known/relex-identity-eu-openid-configuration.json
+summary:
+  types:
+  - oauth2
+  oauth2_flows:
+  - clientCredentials
+  api_keys: false
+  basic_auth: false
+  mutual_tls: false
+  self_service: false
+  anonymous_surface:
+  - url: https://us.monitor.relexsolutions.com/
+    what: Monitoring API service-root liveness document
+    note: The only unauthenticated endpoint found on any RELEX host.
+model: >-
+  One model across both APIs — OAuth 2.0 Client Credentials against RELEX Identity, an OpenID
+  Connect provider, returning a JWT bearer token. There is no API-key path, no basic auth and no
+  mTLS. Credentials are provisioned by RELEX; there is no signup, console or developer registration
+  that issues them.
+schemes:
+- name: OAuth2
+  api: RELEX Data API
+  type: oauth2
+  flows:
+  - flow: clientCredentials
+    tokenUrl: https://identity.prod-eu.prod.cc.relexsolutions.com/login/restapi_prod/connect/token
+    tokenUrl_us: https://identity.prod-us.prod.cc.relexsolutions.com/login/restapi_prod/connect/token
+    tokenUrl_uat: https://identity.prod-eu.prod.cc.relexsolutions.com/login/restapi_uat/connect/token
+    scopes:
+    - openid_api
+  applied: globally, via the root `security` requirement — every one of the 91 operations is
+    protected
+  description: The RELEX Data API uses OAuth 2 with the client credentials flow.
+  sources:
+  - openapi/relex-data-api-openapi.json
+- name: oauth2
+  api: RELEX Monitoring API
+  type: oauth2
+  flows:
+  - flow: clientCredentials
+    tokenUrl: https://identity.prod-eu.prod.cc.relexsolutions.com/monitoring_api_prod/connect/token
+    tokenUrl_us: https://identity.prod-us.prod.cc.relexsolutions.com/monitoring_api_prod/connect/token
+    scopes: []
+  applied: 'declared but NOT applied — the spec has no root `security` requirement and no
+    per-operation `security` block, so the contract does not mark any operation as protected even
+    though the docs and the first-party demo client both send a bearer token'
+  description: OAuth2 client credentials grant; the token endpoint URL depends on the region.
+  sources:
+  - openapi/relex-monitoring-api-openapi.json
+token_request:
+  method: POST
+  content_type: application/x-www-form-urlencoded
+  body_params:
+  - client_id
+  - client_secret
+  - grant_type=client_credentials
+  client_auth_methods_supported:
+  - client_secret_basic
+  - client_secret_post
+  response_fields:
+  - access_token
+  - expires_in
+  - token_type
+  - scope
+  token_type: Bearer
+token_use:
+  header: Authorization
+  format: 'Bearer <jwt>'
+  jwt: true
+  jwt_rfc: RFC 7519
+  jwks_uri: https://identity.prod-eu.prod.cc.relexsolutions.com/login/restapi_prod/.well-known/openid-configuration/jwks
+expiry:
+  refresh_tokens: false
+  refresh_note: >-
+    RELEX cites RFC 6749 §4.4.3 directly — the Client Credentials grant is not compatible with
+    refresh tokens. On expiry the API returns 401.
+  client_strategies:
+  - React to 401 by re-running the Client Credentials grant.
+  - Track expires_in and pre-emptively re-issue before it elapses.
+credential_issuance:
+  self_service: false
+  issued_by: RELEX, during the implementation project
+  required_inputs:
+  - Client ID
+  - Client Secret
+  - RELEX Identity token endpoint URL
+  quote: >-
+    "To authenticate with RELEX Identity, the client needs a Client ID, a Client Secret and a RELEX
+    Identity token endpoint URL. These are provided by RELEX during the implementation process."
+  rotation_policy: not published
+transport_and_network:
+  https_required: true
+  http_behaviour: plain HTTP requests fail with 400 Bad Request
+  ip_allowlist:
+    supported: true
+    recommended_by_provider: true
+    quote: 'The recommendation is to always have an IP allowlist in place.'
+    blocklist_supported: false
+  typical_403_cause: caller's egress IP is not on the allowlist for that environment
+identity_provider:
+  name: RELEX Identity
+  family: IdentityServer / Duende (OpenID Connect)
+  discovery_documents:
+  - well-known/relex-identity-eu-openid-configuration.json
+  - well-known/relex-identity-eu-restapi-prod-openid-configuration.json
+  - well-known/relex-identity-eu-monitoring-api-prod-openid-configuration.json
+  - well-known/relex-identity-us-openid-configuration.json
+  - well-known/relex-identity-us-restapi-prod-openid-configuration.json
+  - well-known/relex-identity-us-monitoring-api-prod-openid-configuration.json
+  regions:
+  - eu
+  - us
+  authorities_per_region: 3
+  see: scopes/relex-scopes.yml
+developer_portal_auth:
+  url: https://docs.relexsolutions.com/
+  gate: Auth0 via Azure Static Web Apps
+  observed: GET / 302s to /.auth/login/auth0?post_login_redirect_uri=/.auth/complete
+  note: >-
+    The full RELEX Developer Portal — which RELEX says carries documentation for every integration
+    method, data formats, authentication, monitoring and the SAP Connector specs — requires a
+    registered account. Everything captured in this repo came from the parts RELEX publishes
+    outside that wall.

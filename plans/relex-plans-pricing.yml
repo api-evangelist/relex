@@ -1,0 +1,29 @@
+generated: '2026-08-26'
+method: searched
+source: https://www.relexsolutions.com/
+plan_count: 0
+public_pricing: false
+note: >-
+  RELEX Solutions publishes no pricing, plans, tiers or quotas of any kind. It is an enterprise
+  sales motion: every commercial path on relexsolutions.com terminates in "Request a demo" or a
+  contact form, and there is no self-service signup, free tier, trial or developer plan. The path
+  /pricing/ is not a pricing page — it 301s to a marketing resource,
+  /resources/pricing-optimization-how-to-build-a-case-for-technology-investment/, which is about
+  RELEX's price-optimization PRODUCT, not the cost of RELEX. API access is provisioned as part of
+  an implementation project: the Data API reference states that Client ID, Client Secret and the
+  RELEX Identity token endpoint URL "are provided by RELEX during the implementation process", and
+  that API limits are "determined during the implementation project". There is therefore nothing
+  to record here, and that absence is the finding.
+plans: []
+evidence:
+- url: https://www.relexsolutions.com/pricing/
+  status: 200
+  result: 301 to /resources/pricing-optimization-how-to-build-a-case-for-technology-investment/ —
+    a content asset, not a pricing page
+- url: https://www.relexsolutions.com/
+  status: 200
+  result: primary calls to action are "Request a demo" and "Request a meeting"; no pricing link in
+    navigation or footer
+- url: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+  status: 200
+  result: credentials and limits are stated to be issued during the implementation project

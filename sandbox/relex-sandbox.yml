@@ -1,0 +1,60 @@
+generated: '2026-08-26'
+method: searched
+source: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+public_signup: false
+self_service: false
+summary: >-
+  RELEX ships a real non-production tier, but it is a PROVISIONED environment, not a public
+  sandbox. There is no anonymous playground, no test key, no free trial and no hosted "try it"
+  console — the ReDoc reference pages are read-only documentation with no execute button.
+  A prospective integrator cannot make a single authenticated RELEX call without an
+  implementation project.
+environments:
+- name: user-acceptance-test
+  aliases:
+  - uat
+  - tier
+  host_pattern: https://uat-{geography}.rest.relexsolutions.com/{customer}
+  example_host: uat-eu.rest.relexsolutions.com
+  identity_authority: https://identity.prod-{geography}.prod.cc.relexsolutions.com/login/restapi_uat/connect/token
+  purpose: >-
+    RELEX describes the standard customer setup as having user-acceptance-test and production
+    environments. UAT may run a MORE RECENT API version than production — the reference states
+    different environments may run different versions concurrently — which makes UAT the place a
+    3-month feature-flag migration is rehearsed.
+  isolated_data: true
+  provisioned_by: RELEX during the implementation project
+- name: production
+  host_pattern: https://{geography}.rest.relexsolutions.com/{customer}
+  example_host: eu.rest.relexsolutions.com
+  identity_authority: https://identity.prod-{geography}.prod.cc.relexsolutions.com/login/restapi_prod/connect/token
+credentials:
+  model: OAuth 2.0 client credentials
+  test_vs_live_separation: by environment host and by RELEX Identity authority path
+    (restapi_uat vs restapi_prod), not by a key prefix
+  key_prefixes: []
+  issued_by: RELEX
+  self_service: false
+  quote: >-
+    "To authenticate with RELEX Identity, the client needs a Client ID, a Client Secret and a RELEX
+    Identity token endpoint URL. These are provided by RELEX during the implementation process."
+test_fixtures:
+  published: false
+  test_values: []
+  note: >-
+    No test cards, magic identifiers, seeded products/locations, time simulation or fixture
+    triggers are published. NOTHING IS INVENTED HERE. The reference does contain a worked
+    authorization example, but its client_id/client_secret are illustrative placeholders in RELEX's
+    own docs and are not usable credentials.
+observability_in_test:
+  health: GET /meta/health
+  version: GET /meta/version
+  ingestion_errors: GET /meta/errors (poll by request_id after each write)
+  monitoring_api: file and job event endpoints, plus an anonymous liveness document at the
+    Monitoring API service root
+console:
+  hosted_try_it: false
+  reference_pages:
+  - https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+  - https://www.relexsolutions.com/api/monitoring-api-example-customer.html
+  renderer: ReDoc 2.1.5 (static, pre-rendered, no request execution)

@@ -1,0 +1,154 @@
+generated: '2026-08-26'
+method: searched
+source: https://www.relexsolutions.com/api/retail-restapi-example-customer.html,
+  https://www.relexsolutions.com/security-compliance/,
+  https://identity.prod-eu.prod.cc.relexsolutions.com/.well-known/openid-configuration
+derived_from:
+- openapi/relex-data-api-openapi.json
+- openapi/relex-monitoring-api-openapi.json
+- well-known/relex-identity-eu-openid-configuration.json
+standards:
+- id: openapi
+  name: OpenAPI Specification 3.1.0
+  conforms: true
+  evidence: 'Both published contracts declare openapi: 3.1.0. Data API — 83 paths / 91 operations,
+    174 component schemas, every operation carrying an operationId, summary, description, tags and
+    a full 4xx/5XX response set. Monitoring API — 5 paths, 9 schemas.'
+  source: openapi/relex-data-api-openapi.json
+- id: oauth2
+  name: OAuth 2.0 (RFC 6749) — Client Credentials grant
+  conforms: true
+  evidence: >-
+    Declared in both specs as a securityScheme of type oauth2 with a clientCredentials flow and a
+    real RELEX Identity tokenUrl, applied globally via the root security requirement in the Data
+    API. The reference documents the full grant, the Authorization: Bearer header, expires_in
+    handling, and explicitly notes that Client Credentials issues no refresh token (RFC 6749
+    §4.4.3).
+  source: openapi/relex-data-api-openapi.json
+- id: oidc
+  name: OpenID Connect Discovery 1.0
+  conforms: true
+  evidence: >-
+    RELEX Identity serves live openid-configuration discovery documents at three authorities per
+    region (root, /login/restapi_prod, /monitoring_api_prod) on both identity.prod-eu... and
+    identity.prod-us..., each advertising issuer, jwks_uri, authorization/token/userinfo/
+    revocation/introspection endpoints, 49 supported scopes, 8 grant types including
+    client_credentials and token-exchange, and PKCE S256. The Data API reference names OIDC and
+    JWT (RFC 7519) directly.
+  source: well-known/relex-identity-eu-openid-configuration.json
+- id: rfc7807
+  name: RFC 7807 Problem Details for HTTP APIs
+  conforms: true
+  evidence: >-
+    Named in the reference ("the RELEX Data API uses the RFC 7807 standard") and implemented in the
+    contract — components.schemas.problem_details_general requires type/title/status, and shared
+    $ref responses wire application/problem+json with worked examples onto 400/401/403/404/413/429
+    and a 5XX wildcard for every path.
+  source: errors/relex-problem-types.yml
+- id: rfc9457
+  name: RFC 9457 Problem Details (obsoletes RFC 7807)
+  conforms: partial
+  evidence: The wire format is compatible and the media type is correct, but RELEX cites 7807
+    rather than 9457 and uses none of 9457's added guidance (no `instance` usage, no registered
+    problem types).
+  source: errors/relex-problem-types.yml
+- id: semver
+  name: Semantic Versioning 2.0.0
+  conforms: true
+  evidence: 'The reference states "All our version identifiers follow semantic versioning
+    principles" and links semver.org/spec/v2.0.0.html, then defines MAJOR/MINOR/PATCH increment
+    rules and permits pre-release suffixes (example given: 4.2.2-beta).'
+  source: lifecycle/relex-lifecycle.yml
+- id: idempotency
+  name: Idempotent HTTP write semantics
+  conforms: true
+  evidence: >-
+    POST (upsert) and DELETE are both documented as idempotent for all data resources, with a
+    customer-supplied meta.batch_id UUID that must be reused across retries of the same logical
+    request. Implemented at the operation level rather than via an Idempotency-Key header.
+  source: conventions/relex-conventions.yml
+- id: pagination
+  name: Paged collection responses with link relations
+  conforms: partial
+  evidence: >-
+    /meta/errors implements page/per_page (max 10000) plus a HAL-style _links.self / _links.next
+    envelope. The bulk /data/* read endpoints publish no pagination at all and are documented as
+    returning arbitrarily large payloads.
+  source: conventions/relex-conventions.yml
+- id: rfc8594
+  name: RFC 8594 Sunset / Deprecation HTTP headers
+  conforms: false
+  evidence: RELEX publishes a real deprecation policy with a stated 3-month feature-flag window,
+    but communicates it out of band. No Sunset or Deprecation header is documented or declared.
+  source: lifecycle/relex-lifecycle.yml
+- id: ratelimit-headers
+  name: RateLimit header fields for HTTP (RFC 9331 draft family)
+  conforms: false
+  evidence: Limits are enforced (5 rps, 1 MB) and signalled with 429/413 problem responses, but no
+    RateLimit-*, X-RateLimit-* or Retry-After header is documented or declared.
+  source: rate-limits/relex-rate-limits.yml
+- id: hmac-webhook-signatures
+  name: HMAC-SHA256 signed webhooks (Svix envelope)
+  conforms: true
+  evidence: >-
+    Webhook deliveries carry SVIX-ID, SVIX-TIMESTAMP and SVIX-SIGNATURE headers; the signature is
+    HMAC with SHA-256 over the id, timestamp and body, verified with a RELEX-issued signing secret.
+    RELEX names Svix as its delivery provider and links Svix's verification guidance and static
+    source-IP list.
+  source: asyncapi/relex-data-api-webhooks.yml
+- id: scim
+  name: SCIM 2.0 (RFC 7643 / 7644)
+  conforms: false
+  evidence: >-
+    RELEX Identity advertises a `scimhost` scope (alongside users:read, tenants:read/write,
+    clients:read/write) in its published OIDC discovery documents, which indicates a SCIM
+    provisioning surface exists inside the platform. No SCIM base URL, /ServiceProviderConfig,
+    /Schemas or urn:ietf:params:scim:schemas:* URN is published anywhere public, so conformance
+    cannot be asserted — only the scope name is observable.
+  source: well-known/relex-identity-eu-openid-configuration.json
+- id: asyncapi
+  name: AsyncAPI
+  conforms: false
+  evidence: RELEX operates a real event surface (webhooks via Svix) but publishes no AsyncAPI
+    document for it. The event catalogue is captured in asyncapi/relex-data-api-webhooks.yml.
+  source: asyncapi/relex-data-api-webhooks.yml
+compliance:
+  published: true
+  url: https://www.relexsolutions.com/security-compliance/
+  certifications:
+  - name: ISO/IEC 27001:2013
+    scope: RELEX Inventory and Supply Chain software
+    source: https://www.relexsolutions.com/security-compliance/
+  - name: SOC 2 (ISAE 3000)
+    detail: Type I and Type II reports completed
+    source: https://www.relexsolutions.com/security-compliance/
+  - name: GDPR
+    detail: EU data protection programme; RELEX is Helsinki-headquartered and offers EU-resident
+      environments (uat-eu / eu hosts)
+    source: https://www.relexsolutions.com/security-compliance/
+  related_pages:
+  - https://www.relexsolutions.com/privacy-trust-center/
+  - https://www.relexsolutions.com/policy/infosec-faq/
+  - https://www.relexsolutions.com/policy/ai-governance-trust-at-relex/
+  - https://www.relexsolutions.com/policy/vulnerability-disclosure/
+domain_standard_conformance:
+  detected: false
+  market: retail and supply chain planning (demand forecasting, replenishment, assortment, pricing)
+  candidates_checked:
+  - standard: GS1 / GTIN / EAN product identification
+    result: not declared — no gtin, ean or gs1 field, schema or identifier scheme appears anywhere
+      in the 174-schema Data API contract. Products carry RELEX/customer-native identifiers, and a
+      `retail_barcode` resource exists but declares no GS1 semantics.
+  - standard: EDIFACT / ANSI X12 order and despatch messages
+    result: not declared — no EDI message type appears in the contract. Order proposals, purchase
+      orders and deliveries are modelled as native JSON resources.
+  - standard: SCIM 2.0
+    result: scope name only, no published surface — see the scim entry above.
+  - standard: ISO 20022
+    result: not applicable — RELEX is not a payments or financial-messaging provider.
+  note: >-
+    REWARD-ONLY CHECK, HONESTLY MISSED. RELEX's market does have candidate standards (GS1 above
+    all), and RELEX does not declare any of them in its contract. Nothing is invented here to fill
+    the slot. Worth noting for a future round: retail data exchange is exactly the domain where a
+    GS1 identifier declaration would let a buyer integrate with no bespoke mapping, and this
+    contract's product identifiers are entirely customer-defined.

@@ -1,0 +1,102 @@
+generated: '2026-08-26'
+method: searched
+source: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+type: Webhooks
+asyncapi_published: false
+asyncapi_note: >-
+  RELEX operates a real, documented, signed event surface but publishes NO AsyncAPI document for
+  it, and none was found on any host, in the GitHub org, or at /asyncapi.yaml on either API host.
+  This catalogue is transcribed from the "Webhooks" chapter of the RELEX Data API reference — it
+  is not a fabricated spec, and nothing here is asserted that RELEX does not state.
+surface:
+  style: HTTP webhooks (server-initiated POST to a customer-provided endpoint)
+  purpose: >-
+    Notify a customer that RELEX planning OUTPUT data is available, so the customer can pull it,
+    instead of polling the read endpoints on a schedule.
+  payload_policy: >-
+    Metadata only. RELEX states explicitly - "Only the metadata is sent to the endpoint. To get the
+    actual data a subsequent request to the rest-api should be executed." The webhook is a pointer,
+    never the record.
+  delivery_provider: Svix
+  transport: HTTPS POST
+  content_type: application/json
+events:
+- type: data.transactions.notify
+  description: One or more transactional output resources are available for retrieval.
+  observed_resources:
+  - sales_forecasts
+  - order_proposals
+  - workload_driver_forecasts_day
+  - workload_driver_forecasts_quarter
+  followup_operation_ids:
+  - list_GetSalesForecasts
+  - get_GetSalesForecasts
+  - list_GetOrderProposals
+  - get_GetOrderProposals
+  - list_GetWorkloadDriverForecastsDay
+  - get_GetWorkloadDriverForecastsDay
+  - list_GetWorkloadDriverForecastsQuarter
+  - get_GetWorkloadDriverForecastsQuarter
+  note: >-
+    sales_forecasts is the resource RELEX uses in its own published example payload. The other
+    three are the remaining GET-able transactional output resources in the contract; the event
+    type is generic over the namespace rather than per-resource.
+- type: data.custom.notify
+  description: One or more customer-specific custom resources are available for retrieval.
+  observed_resources: []
+  note: >-
+    RELEX documents the event type as the pattern `data.<namespace>.notify` and names `custom` as
+    an example namespace. The concrete resources are per-customer and are not public.
+payload_shape:
+  meta:
+    created_at: ISO 8601 timestamp — when the webhook message was created
+    type: 'event type, formatted data.<namespace>.notify'
+  data:
+    description: array of available resources
+    item_fields:
+      id: unique identifier for the resource instance (UUID)
+      resource: resource name, e.g. sales_forecasts
+      timestamp: ISO 8601 — when the data was made available
+      url: relative path to the resource, e.g. /data/transactions/sales_forecasts/{id}
+  example_source: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+security:
+  signing: HMAC-SHA256 over the Svix envelope
+  headers:
+  - name: SVIX-ID
+    description: unique message identifier for this webhook message
+  - name: SVIX-TIMESTAMP
+    description: seconds since epoch
+  - name: SVIX-SIGNATURE
+    description: space-delimited list of Base64-encoded signatures
+  secret: an encoding/signing secret is issued by RELEX to the customer
+  verification: >-
+    RELEX recommends verifying with the Svix SDK, and documents manual verification as the
+    fallback. It also warns that CSRF protection must be DISABLED on the receiving endpoint,
+    because webhooks are server-initiated.
+  source_ips:
+    static: true
+    maintained_at: https://docs.svix.com/receiving/source-ips
+    note: Deliveries originate from Svix's published static ranges; firewalled receivers must
+      allowlist them.
+delivery:
+  success_criterion: any 2xx (200-299) returned within 15 seconds
+  timeout_seconds: 15
+  retry_strategy: exponential backoff, fixed published schedule
+  retry_schedule:
+  - immediately
+  - 5 seconds
+  - 5 minutes
+  - 30 minutes
+  - 2 hours
+  - 5 hours
+  - 10 hours
+  - 10 hours (additional, after the previous attempt)
+  worked_example: an attempt that fails three times before succeeding is delivered roughly 35
+    minutes and 5 seconds after the first attempt
+  ordering_guarantee: not published
+  deduplication: SVIX-ID is a unique message identifier and can be used by the receiver to
+    de-duplicate redeliveries
+subscription_management:
+  self_service: false
+  note: No public API or portal endpoint for registering, listing or rotating webhook endpoints
+    was found. Endpoints and signing secrets are configured with RELEX during implementation.

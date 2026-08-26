@@ -1,0 +1,26 @@
+generated: '2026-08-26'
+method: probed
+source: live DNS/TLS/HTTP probes of apis.yml + OpenAPI hosts
+hosts:
+- host: www.relexsolutions.com
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Nov  6 08:18:00 2026 GMT
+  hsts: false
+- host: eu.rest.relexsolutions.com
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Oct 11 16:32:36 2026 GMT
+  hsts: null
+- host: eu.monitor.relexsolutions.com
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Oct  6 20:53:47 2026 GMT
+  hsts: null
+domains:
+- domain: relexsolutions.com
+  dnssec: false
+  caa: []
+  spf: true
+  dmarc: true
+  dmarc_policy: quarantine

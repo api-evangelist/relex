@@ -1,0 +1,226 @@
+generated: '2026-08-26'
+method: searched
+source: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+derived_from:
+- openapi/relex-data-api-openapi.json
+- openapi/relex-monitoring-api-openapi.json
+summary: >-
+  The RELEX Data API is a batch-oriented REST contract that deviates deliberately from
+  record-at-a-time REST: a single request carries a LIST of records, POST is an upsert (create and
+  update in one verb), and every data verb is documented as idempotent. Ingestion is asynchronous —
+  a 200 means accepted, not processed — and processing errors are collected afterwards from a
+  separate paged /meta/errors resource keyed by the request_id the write returned. That request_id
+  is the tracing handle for the whole system.
+auth:
+  style: oauth2 client credentials (OpenID Connect / RELEX Identity)
+  header: 'Authorization: Bearer <jwt>'
+  token_endpoint_data_api: https://identity.prod-eu.prod.cc.relexsolutions.com/login/restapi_prod/connect/token
+  token_endpoint_monitoring_api: https://identity.prod-eu.prod.cc.relexsolutions.com/monitoring_api_prod/connect/token
+  refresh_tokens: false
+  refresh_note: Client Credentials grant does not issue refresh tokens; on 401 the client re-runs
+    the grant or pre-emptively refreshes before expires_in elapses.
+  transport: HTTPS only — plain HTTP requests fail with 400 Bad Request
+  network: optional IP allowlist (RELEX recommends always configuring one); no blocklist supported
+  see: authentication/relex-authentication.yml
+idempotency:
+  supported: true
+  mechanism: verb-level and payload-level, NOT a client-supplied Idempotency-Key header
+  header: null
+  detail: >-
+    RELEX documents idempotency as a property of the operations themselves rather than as an
+    opt-in header. Quoting the reference: "POST requests to data resources are idempotent.
+    Resending the same payload is safe and produces the same result. In practice, this means that
+    if you are uncertain whether a request was received, for example due to a network failure
+    before the response arrived, you can resend the same request without risk of creating
+    duplicate records." DELETE is likewise idempotent — "the first request deletes the specified
+    rows, and subsequent retries are ignored" — and GET is idempotent and side-effect free.
+  correlation:
+    field: meta.batch_id
+    format: UUID
+    required: false
+    recommendation: >-
+      RELEX strongly recommends sending a customer-generated batch_id in the request body's meta
+      section, and states the rule that makes it an idempotency key in practice: "Each logically
+      separate request must have a different batch_id. Retries of the same request must use the
+      same batch_id."
+  ordering_field:
+    field: meta.timestamp
+    format: monotonically increasing integer
+    note: Used internally by RELEX for logging and telemetry; when several source systems write to
+      one resource they must share a single timestamp source.
+  retention: not published
+  scope: all /data/* POST and DELETE operations
+  source: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+pagination:
+  style: page-number with HAL-style link relations
+  applies_to: /meta/errors (the asynchronous-error resource)
+  params:
+  - name: page
+    in: query
+    description: the desired page of the available result set
+  - name: per_page
+    in: query
+    description: maximum items per response
+    maximum: 10000
+  response_fields:
+    links: _links
+    self: _links.self.href
+    next: _links.next.href
+  termination: absence of _links.next means no further batches AT PRESENT — because ingestion is
+    asynchronous, new errors may appear on a later poll even after next disappears
+  note: >-
+    The bulk /data/* read endpoints (sales_forecasts, order_proposals, workload_driver_forecasts_*)
+    are documented as returning arbitrarily large payloads with no pagination and no declared
+    response-size cap.
+  source: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+filtering:
+  error_resource:
+    mutually_exclusive_modes:
+    - by request: request_id
+    - by time: start_timestamp (inclusive) + end_timestamp (exclusive)
+    note: the two modes cannot be combined in one call
+  monitoring_api:
+    params:
+    - env
+    - file_name
+    - start_timestamp
+    - end_timestamp
+request_id_tracing:
+  field: request_id
+  returned_by: every POST and DELETE response
+  used_for: >-
+    Correlating asynchronous ingestion errors back to the write that caused them via
+    GET /meta/errors?request_id=... . RELEX describes it as "a handle for an asynchronous
+    background processing job".
+  header: null
+versioning:
+  scheme: semver 2.0.0, single public "API version" number
+  composition: >-
+    The public API version is the SUM of a Core version (API semantics, auth, payload formats) and
+    a per-customer Data model version (schemas and bespoke fields). Core 1.2.3 + data model 4.3.2
+    yields API version 5.5.5. Suffixes are concatenated.
+  in_url: false
+  in_header: false
+  discovery: GET /meta/version
+  concurrency: one environment hosts exactly one version at a time; different environments (UAT vs
+    production) may run different versions concurrently
+  see: lifecycle/relex-lifecycle.yml
+error_envelope:
+  format: rfc7807
+  media_type: application/problem+json
+  declared_in_spec: true
+  required_members:
+  - type
+  - title
+  - status
+  optional_members:
+  - detail
+  - instance
+  extensible: true
+  type_uri_pattern: https://relexsolutions.com/rest/errors/{status}
+  see: errors/relex-problem-types.yml
+  note: RELEX cites RFC 7807; RFC 9457 obsoletes it but the wire format is compatible.
+rate_limit_signaling:
+  headers: []
+  status_codes:
+  - 429
+  - 413
+  note: Status-code-only. No RateLimit-* / X-RateLimit-* / Retry-After headers are documented, so
+    a client cannot see its remaining budget before it is exhausted.
+  see: rate-limits/relex-rate-limits.yml
+payload:
+  content_type: application/json
+  compression: supported on request bodies (see "Payload compression" in the reference)
+  max_request_bytes: 1048576
+  batching: 'many records per request is the default pattern for every verb: List (GET), Upsert
+    (POST), Delete (DELETE)'
+  naming: lower-case, plural nouns, dashes for spaces, resources confined to declared namespaces
+  namespaces:
+  - meta
+  - data/master
+  - data/transactions
+  - data/custom
+  dates: ISO 8601
+  localization: multi-language name fields are documented per resource
+asynchrony:
+  write_semantics: 200 on a write means the payload was ACCEPTED for ingestion, not that it was
+    processed
+  error_retrieval: poll GET /meta/errors with the returned request_id until processing settles
+  implication_for_agents: >-
+    A single 2xx is not proof of success. An agent that writes and stops has not confirmed
+    anything; the confirmation step is a separate read.
+dry_run_mode:
+  supported: false
+  status: na
+  note: No dry-run, preview, validate-only or simulate parameter is declared in either OpenAPI or
+    documented in the reference.
+reversibility:
+  status: documented
+  grade: documented
+  rationale: >-
+    RELEX documents reversal paths for part of its write surface but states no time window for any
+    of them, and the largest part of the write surface — transactional upserts — has no reversal
+    operation at all. Under the 0.12.0 rubric that is `documented` (a reversal path exists), not
+    `verified` (a reversal path AND a stated window).
+  surfaces:
+  - surface: Master data records (campaigns, delivery schedules, batch sizes, pre-pack variants,
+      product replacements)
+    write_operations:
+    - PostCampaigns
+    - PostLocationSupplierDeliverySchedules
+    - PostBatchSizes
+    - PostPrePackVariants
+    - PostProductLocationBatchSizes
+    - PostProductLocationCampaigns
+    - PostProductLocationDeliverySchedules
+    - PostProductReplacementsAndReferences
+    reversal_operation: DELETE on the same resource
+    reversal_operation_ids:
+    - DeleteCampaigns
+    - DeleteLocationSupplierDeliverySchedules
+    - DeleteBatchSizes
+    - DeletePrePackVariants
+    - DeleteProductLocationBatchSizes
+    - DeleteProductLocationCampaigns
+    - DeleteProductLocationDeliverySchedules
+    - DeleteProductReplacementsAndReferences
+    window: null
+    window_documented: false
+    restorable_after_delete: false
+    note: >-
+      DELETE removes rows; RELEX documents no undelete, restore, trash or soft-delete retention
+      window. The 8 DELETE operations are the ONLY reversal operations in the contract, and they
+      cover 8 of 72 POST resources. Deletion is itself idempotent (retries are ignored), so a
+      repeated delete is safe — but the delete itself is not itself reversible through the API.
+    docs: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+  - surface: Transactional data (sales, deliveries, orders, adjustments, balances, goods received,
+      inventory events, lost sales, spoilage, transfers, footfall counts)
+    write_operations: all /data/transactions/* POST operations
+    reversal_operation: null
+    window: null
+    window_documented: false
+    note: >-
+      There is no DELETE, void, cancel or reverse operation on any transaction resource. The only
+      documented correction mechanism is semantic rather than transport-level — the sales resource
+      description says a customer return is modelled as "reversal", i.e. the correction is a NEW
+      record with a compensating quantity, submitted through the same POST. Because POST is an
+      upsert keyed on the record's business key, re-POSTing a corrected record overwrites the
+      previous value in place. An agent that writes a wrong transaction cannot delete it; it must
+      know the business key and overwrite it, or post a compensating record.
+    docs: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+  - surface: Read operations (/meta/*, sales_forecasts, order_proposals, workload driver forecasts)
+    reversal_operation: na
+    status: na
+    note: read-only, nothing to reverse
+webhooks:
+  see: asyncapi/relex-data-api-webhooks.yml
+disaster_recovery:
+  model: active / hot-standby with a DNS-based traffic load balancer
+  source: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+cross_links:
+  errors: errors/relex-problem-types.yml
+  lifecycle: lifecycle/relex-lifecycle.yml
+  authentication: authentication/relex-authentication.yml
+  scopes: scopes/relex-scopes.yml
+  rate_limits: rate-limits/relex-rate-limits.yml
+  sandbox: sandbox/relex-sandbox.yml

@@ -1,0 +1,63 @@
+generated: '2026-08-26'
+method: searched
+source: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+docs: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+note: >-
+  Limits are published in the "Quotas and limits" section of the RELEX Data API reference and are
+  explicitly described by RELEX as negotiable — "subject to discussion" for the rate, and
+  "determined during the implementation project" for the values as a whole. RELEX states it imposes
+  NO limit on response payload size. The RELEX Monitoring API reference publishes no limits at all.
+  No RateLimit-* or X-RateLimit-* response headers are documented or declared in either OpenAPI, so
+  an agent has no runtime budget signal — it can only react to the 429/413 status codes after the
+  fact.
+limit_count: 2
+limits:
+- api: RELEX Data API
+  scope: per-client (OAuth client credentials identity), all endpoints
+  window: 1 second
+  limit: 5
+  unit: requests
+  burst: null
+  negotiable: true
+  status_on_exhaustion: 429
+  source: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+- api: RELEX Data API
+  scope: per-request payload size, all POST endpoints
+  window: per request
+  limit: 1
+  unit: megabytes
+  negotiable: true
+  status_on_exhaustion: 413
+  note: >-
+    Payloads over 1 MB must be split into smaller chunks and sent as multiple independent requests;
+    each chunk is processed separately.
+  source: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+response_headers:
+  documented: []
+  note: >-
+    No rate-limit response headers are documented. Neither RateLimit-Limit/RateLimit-Remaining/
+    RateLimit-Reset (RFC 9331 draft) nor X-RateLimit-* nor Retry-After appear in the docs or in the
+    OpenAPI response definitions.
+exhaustion:
+  status: 429
+  content_type: application/problem+json
+  example:
+    type: https://relexsolutions.com/rest/errors/429
+    title: Too Many Requests
+    status: 429
+    detail: 'Rate limit has been exceeded: The request could not be completed due to the client
+      exceeding the request limit.'
+  retry_guidance: 'Docs say "Please retry later"; no Retry-After header and no backoff schedule
+    is published for the request path.'
+oversize:
+  status: 413
+  content_type: application/problem+json
+  example:
+    type: https://example.com/probs/size-limit-exceeded
+    title: Payload Too Large
+    status: 413
+    detail: Payload was larger than 1mb
+unlimited:
+- surface: response payloads
+  note: 'RELEX states: "The RELEX Data API imposes no limits on return payloads. The payload size
+    can be arbitrarily large."'
