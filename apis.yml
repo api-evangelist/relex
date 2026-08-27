@@ -30,60 +30,258 @@ tags:
 - Data Integration
 - Company
 apis:
-- aid: relex:relex-data-api
-  name: RELEX Data API
-  description: 'The RELEX Data API is the near-real-time REST interface for exchanging master
-    data, transactional data and customer-specific custom resources between a customer''s ERP,
-    POS, WMS or MDM systems and the RELEX planning platform. It is a batch-oriented REST design:
-    a single POST can upsert many records at once (up to a 1 MB payload), POST and DELETE are
-    documented as idempotent, errors follow RFC 7807 problem+json, and asynchronous ingestion
-    errors are retrievable through a paged /meta/errors resource. Webhooks (delivered via Svix,
-    HMAC-SHA256 signed) notify clients when planning output data becomes available.'
+- aid: relex:relex-environments-api
+  name: RELEX Solutions Environments API
+  description: Endpoints for managing and retrieving customer-specific environment configurations.
   humanURL: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
   baseURL: https://eu.rest.relexsolutions.com
   tags:
-  - Data Integration
-  - Supply Chain
-  - Retail
-  - Transactions
-  - Master Data
+  - Environments
   properties:
   - type: OpenAPI
-    url: openapi/relex-data-api-openapi.json
+    url: openapi/relex-environments-api-openapi.yml
   - type: Documentation
     url: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
   - type: Webhooks
     url: asyncapi/relex-data-api-webhooks.yml
-  - type: Overlay
-    url: overlays/relex-data-api-overlay.yaml
-- aid: relex:relex-monitoring-api
-  name: RELEX Monitoring API
-  description: 'The RELEX Monitoring API lets customers observe the status of their own RELEX
-    environments programmatically: file ingestion events, planning job events, environment
-    inventory and platform metrics. It is an OpenAPI 3.1 REST contract secured with OAuth 2.0
-    client credentials against RELEX Identity, served from regional hosts in the EU and US,
-    with a public Python demo client published on GitHub.'
-  humanURL: https://www.relexsolutions.com/relex-monitoring-api/
-  baseURL: https://eu.monitor.relexsolutions.com
-  tags:
-  - Monitoring
-  - Observability
-  - Supply Chain
-  properties:
-  - type: OpenAPI
-    url: openapi/relex-monitoring-api-openapi.json
   - type: Documentation
     url: https://www.relexsolutions.com/api/monitoring-api-example-customer.html
   - type: SourceCode
     url: https://github.com/relex/monitoring-api-demo
-  - type: Overlay
-    url: overlays/relex-monitoring-api-overlay.yaml
+- aid: relex:relex-events-api
+  name: RELEX Solutions Events API
+  description: Endpoints for fetching files and jobs event data.
+  humanURL: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+  baseURL: https://eu.rest.relexsolutions.com
+  tags:
+  - Events
+  properties:
+  - type: OpenAPI
+    url: openapi/relex-events-api-openapi.yml
+  - type: Documentation
+    url: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+  - type: Webhooks
+    url: asyncapi/relex-data-api-webhooks.yml
+  - type: Documentation
+    url: https://www.relexsolutions.com/api/monitoring-api-example-customer.html
+  - type: SourceCode
+    url: https://github.com/relex/monitoring-api-demo
+- aid: relex:relex-health-api
+  name: RELEX Solutions Health API
+  description: Endpoint that report on the Monitoring API operational and readiness status.
+  humanURL: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+  baseURL: https://eu.rest.relexsolutions.com
+  tags:
+  - Health
+  properties:
+  - type: OpenAPI
+    url: openapi/relex-health-api-openapi.yml
+  - type: Documentation
+    url: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+  - type: Webhooks
+    url: asyncapi/relex-data-api-webhooks.yml
+  - type: Documentation
+    url: https://www.relexsolutions.com/api/monitoring-api-example-customer.html
+  - type: SourceCode
+    url: https://github.com/relex/monitoring-api-demo
+- aid: relex:relex-master-data-api
+  name: RELEX Solutions Master data API
+  description: >-
+    The namespace for master data contains the different endpoints for transferring master data.
+  humanURL: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+  baseURL: https://eu.rest.relexsolutions.com
+  tags:
+  - Master data
+  properties:
+  - type: OpenAPI
+    url: openapi/relex-master-data-api-openapi.yml
+  - type: Documentation
+    url: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+  - type: Webhooks
+    url: asyncapi/relex-data-api-webhooks.yml
+  - type: Documentation
+    url: https://www.relexsolutions.com/api/monitoring-api-example-customer.html
+  - type: SourceCode
+    url: https://github.com/relex/monitoring-api-demo
+- aid: relex:relex-metadata-api
+  name: RELEX Solutions Metadata API
+  description: The namespace for metadata contains the different endpoints for API metadata.
+  humanURL: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+  baseURL: https://eu.rest.relexsolutions.com
+  tags:
+  - Metadata
+  properties:
+  - type: OpenAPI
+    url: openapi/relex-metadata-api-openapi.yml
+  - type: Documentation
+    url: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+  - type: Webhooks
+    url: asyncapi/relex-data-api-webhooks.yml
+  - type: Documentation
+    url: https://www.relexsolutions.com/api/monitoring-api-example-customer.html
+  - type: SourceCode
+    url: https://github.com/relex/monitoring-api-demo
+- aid: relex:relex-metrics-api
+  name: RELEX Solutions Metrics API
+  description: >-
+    The Monitoring API exposes a Prometheus-compatible metrics endpoint at `/api/v1/{customer_id}/metrics`.
+
+    The metrics available over this endpoint give quantitative insight into the throughput,
+
+    latency, and reliability of data flowing into RELEX services.
+
+
+    When applicable, metrics are labelled with a `type` dimension that identifies the data type
+
+    (e.g. `sales`, `product_locations`). The `type` values are normalised to use underscores.
+
+
+    ## Plan data ingestion metrics
+
+
+    These metrics describe the end-to-end data ingestion pipeline from the point data
+
+    is received by RELEX until it is consumed by RELEX Plan, the core supply chain
+
+    planning application. The metrics are technology-agnostic and apply regardless of
+
+    whether data is ingested via batch file uploads or via the Data API.
+
+
+    | Metric | Type | Unit | Description |
+
+    |--------|------|------|-------------|
+
+    | `plan_data_ingestion_delay_seconds` | Gauge | seconds | End-to-end latency of RELEX Plan data ingestion,
+    measured as the delay between data being sent to RELEX and data being consumed by RELEX Plan. |
+
+    | `plan_data_ingestion_messages_total` | Counter | messages | Total number of messages (files or records)
+    ingested by RELEX Plan. Tracks overall ingestion throughput. |
+
+    | `plan_data_ingestion_rows_total` | Counter | rows | Total number of data rows processed by RELEX
+    Plan during ingestion. Provides a fine-grained view of data volume beyond message counts. |
+
+      Labels used with `plan_data_ingestion_*` metrics:
+
+      | Label | Meaning |
+      |-------|---------|
+      | `app` | Which customer application the metric belongs to. |
+      | `env` | Which customer environment the application belongs to. |
+      | `type` | Which kind of integration data stream the metric describes. |
+
+    ## Data API HTTP metrics
+
+
+    These metrics follow [OpenTelemetry semantic conventions](https://opentelemetry.io/docs/specs/semconv/http/http-metrics/)
+
+    and describe the HTTP layer of the [RELEX Data API](https://docs.relexsolutions.com/docs/restapis/data-api/guide),
+
+    for customers using that integration method.
+
+
+    | Metric | Type | Unit | Description |
+
+    |--------|------|------|-------------|
+
+    | `http_server_request_duration_ms` | Histogram | milliseconds | Duration of HTTP requests received
+    by the Data API. |
+
+    | `http_server_request_body_size_bytes` | Counter | bytes | Cumulative size of HTTP request bodies
+    received by the Data API. Indicates the volume of data being sent to RELEX. |
+
+    | `http_server_response_body_size_bytes` | Counter | bytes | Cumulative size of HTTP response bodies
+    returned by the Data API. |
+
+    | `http_server_request_count_by_status` | Counter | requests | Total number of HTTP requests received
+    by the Data API, broken down by HTTP status code (`http_status` label). |
+
+
+    Labels used with `http_server_request_duration_ms*` metrics:
+
+
+    | Label | Meaning |
+
+    |-------|---------|
+
+    | `type` | Which kind of integration data stream the metric describes. |
+
+    | `http_path` | Which API endpoint received the data in RELEX. |
+
+    | `le` | For bucket metrics, the upper time limit of the bucket in milliseconds. This label is not
+    present on the related `_sum` and `_count` metrics. |
+
+
+    Labels used with `http_server_request_count_by_status`:
+
+
+    | Label | Meaning |
+
+    |-------|---------|
+
+    | `type` | Which kind of integration data stream the metric describes. |
+
+    | `http_path` | Which API endpoint received the data in RELEX. |
+
+    | `http_status` | Which HTTP response status RELEX returned, for example `200` or `400`. |
+
+
+    Labels used with `http_server_request_body_size_bytes*` and `http_server_response_body_size_bytes*`
+    metrics:
+
+
+    | Label | Meaning |
+
+    |-------|---------|
+
+    | `type` | Which kind of integration data stream the metric describes. |
+
+    | `http_path` | Which API endpoint received the data in RELEX for request size metrics, or which API
+    endpoint RELEX sent the data from for response size metrics. |
+  humanURL: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+  baseURL: https://eu.rest.relexsolutions.com
+  tags:
+  - Metrics
+  properties:
+  - type: OpenAPI
+    url: openapi/relex-metrics-api-openapi.yml
+  - type: Documentation
+    url: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+  - type: Webhooks
+    url: asyncapi/relex-data-api-webhooks.yml
+  - type: Documentation
+    url: https://www.relexsolutions.com/api/monitoring-api-example-customer.html
+  - type: SourceCode
+    url: https://github.com/relex/monitoring-api-demo
+- aid: relex:relex-transactions-api
+  name: RELEX Solutions Transactions API
+  description: >-
+    The namespace for transaction data contains the different endpoints for inventory transactions, balance
+    and open order information.
+  humanURL: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+  baseURL: https://eu.rest.relexsolutions.com
+  tags:
+  - Transactions
+  properties:
+  - type: OpenAPI
+    url: openapi/relex-transactions-api-openapi.yml
+  - type: Documentation
+    url: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
+  - type: Webhooks
+    url: asyncapi/relex-data-api-webhooks.yml
+  - type: Documentation
+    url: https://www.relexsolutions.com/api/monitoring-api-example-customer.html
+  - type: SourceCode
+    url: https://github.com/relex/monitoring-api-demo
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: Overlay
+  url: overlays/relex-data-api-overlay.yaml
+- type: Overlay
+  url: overlays/relex-monitoring-api-overlay.yaml
 - type: TrustCenter
   url: security/relex-trust-center.yml
 - type: VulnerabilityDisclosure
