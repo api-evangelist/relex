@@ -1,0 +1,27 @@
+slug: relex
+provider: RELEX Solutions
+generated_by: planning/capability-mapping/scripts/classify_capabilities.py
+model: claude-opus-5
+frame:
+- Transportation & Logistics
+min_confidence: 0.7
+capability_model:
+  source: https://github.com/vincentmakes/turbo-ea-capabilities
+  license: CC-BY-4.0
+  attribution: Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities,
+    CC BY 4.0
+  notice: NOTICE
+edge_count: 1
+edges:
+- tag: Master data
+  spec_file: relex-master-data-api-openapi.yml
+  capability_id: BC-610.20
+  capability_id_l1: BC-610
+  capability_name: Master Data Management
+  confidence: 0.75
+  evidence: POST /data/master/assortments, /data/master/barcodes, /data/master/bills_of_materials, /data/master/chains,
+    /data/master/clusters; schemas retail_product, retail_location_request_body
+  reason: The surface is bulk load/delete of reference master records (products, locations, barcodes,
+    assortments, chains, clusters) into the planning platform — i.e. maintenance of product/location master
+    data. Master Data Management is the direct fit; the data happens to be retail supply-chain master
+    data but the operations are master-record maintenance.

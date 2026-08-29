@@ -290,6 +290,9 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: CapabilityMap
+  url: capabilities/relex-capability-edges.yml
+  name: RELEX Solutions Business Capability Map
 - type: Overlay
   url: overlays/relex-data-api-overlay.yaml
 - type: Overlay
