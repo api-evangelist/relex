@@ -12,6 +12,18 @@ description: 'RELEX Solutions is a Helsinki-headquartered supply chain and retai
   Both APIs are secured with OAuth 2.0 client credentials against RELEX Identity, publish
   RFC 7807 problem responses, and are documented publicly as ReDoc reference pages, while the
   full RELEX Developer Portal at docs.relexsolutions.com sits behind an Auth0 login.'
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: true
+  label: Hosted service · you call their endpoint
+  confidence: high
+  source:
+  - openapi
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 image: https://s32519.pcdn.co/wp-content/uploads/2024/01/RELEX-logo-1200x627-social.png
 url: https://raw.githubusercontent.com/api-evangelist/relex/refs/heads/main/apis.yml
 x-type: company
