@@ -66,6 +66,8 @@ apis:
   humanURL: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
   baseURL: https://eu.rest.relexsolutions.com
   tags:
+  - Event
+  tags_raw:
   - Events
   properties:
   - type: OpenAPI
@@ -103,6 +105,8 @@ apis:
   humanURL: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
   baseURL: https://eu.rest.relexsolutions.com
   tags:
+  - Master Data
+  tags_raw:
   - Master data
   properties:
   - type: OpenAPI
@@ -272,6 +276,8 @@ apis:
   humanURL: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
   baseURL: https://eu.rest.relexsolutions.com
   tags:
+  - Transaction
+  tags_raw:
   - Transactions
   properties:
   - type: OpenAPI
