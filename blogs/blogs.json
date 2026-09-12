@@ -3,12 +3,19 @@
   "feeds": [
     {
       "source": "https://www.relexsolutions.com/community-portal/",
-      "feed_url": "https://www.relexsolutions.com/community-portal/feed/",
+      "feed_url": "https://www.relexsolutions.com/community-portal/blog/feed/",
       "title": "",
       "saved": 0,
       "method": "discovered"
+    },
+    {
+      "source": "https://www.relexsolutions.com/community-portal/feed/",
+      "feed_url": "https://www.relexsolutions.com/community-portal/feed/",
+      "title": "",
+      "saved": 0,
+      "method": "feed"
     }
   ],
   "post_count": 0,
-  "fetched": "2026-08-30T22:33:40Z"
+  "fetched": "2026-09-06T19:17:18Z"
 }
