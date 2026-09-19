@@ -63,6 +63,8 @@ apis:
   humanURL: https://www.relexsolutions.com/api/retail-restapi-example-customer.html
   baseURL: https://eu.rest.relexsolutions.com
   tags:
+  - Environment
+  tags_raw:
   - Environments
   properties:
   - type: OpenAPI
