@@ -1,0 +1,34 @@
+{
+  "provider": "relex",
+  "sources": [
+    "_original/relex-data-api-openapi.json",
+    "_original/relex-monitoring-api-openapi.json"
+  ],
+  "outputs": [
+    "relex-master-data-api-openapi.yml",
+    "relex-metadata-api-openapi.yml",
+    "relex-transactions-api-openapi.yml",
+    "relex-environments-api-openapi.yml",
+    "relex-events-api-openapi.yml",
+    "relex-health-api-openapi.yml",
+    "relex-metrics-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [
+    "sourced from openapi/_original/ (2 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "relex-data-api-openapi.json: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "relex-monitoring-api-openapi.json: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "apis.yml register: already-registered"
+  ],
+  "skipped": [
+    "relex-environments-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "relex-events-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "relex-health-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "relex-master-data-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "relex-metadata-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "relex-metrics-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "relex-transactions-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
+}
