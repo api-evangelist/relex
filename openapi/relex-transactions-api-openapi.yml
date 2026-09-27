@@ -914,6 +914,1115 @@ paths:
           $ref: '#/components/responses/Problem5xxResponse'
 components:
   schemas:
+    retail_footfall_count_request_body:
+      type: object
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        meta:
+          type: object
+          $ref: '#/components/schemas/inbound_meta'
+        data:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/footfall_count'
+    retail_balance_request_body:
+      type: object
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        meta:
+          type: object
+          $ref: '#/components/schemas/inbound_meta'
+        data:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/balance'
+    retail_dc_transaction_request_body:
+      type: object
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        meta:
+          type: object
+          $ref: '#/components/schemas/inbound_meta'
+        data:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/dc_transaction'
+    dc_transaction:
+      type: object
+      properties:
+        product:
+          type: string
+          minLength: 1
+          description: Product code. Reference to Products.
+          example: PRODUCT1
+        location:
+          type: string
+          minLength: 1
+          description: Location code. Reference to Locations.
+          example: LOCATION1
+        date:
+          type: string
+          minLength: 1
+          format: date
+          description: Transaction posting date.
+          example: '2018-07-01'
+        sales_orders_quantity:
+          type: number
+          description: 'Only for type: OPEN_SALES_ORDER. Open order quantity in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit). Quantity sign defines the transaction direction as seen by the warehouse, so open sales order is sent as negative quantity.'
+          exclusiveMaximum: 0
+          example: -2
+        sales_orders_value:
+          type:
+          - number
+          - 'null'
+          description: 'Only for type: OPEN_SALES_ORDER. Value of the whole transaction in the location''s currency (e.g. €, £, $). Value should always be positive as transaction quantity determines the direction of the transaction. Value suggestion: Sales value excluding tax. If the sales order is internal sale, the value should be the internal sales value used for the transaction'
+          minimum: 0
+          example: 3.98
+        balance:
+          type:
+          - number
+          - 'null'
+          description: 'Only for type: BALANCE or BATCH_BALANCE. Physical balance quantity in the location in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit). Balance quantity should be always positive and possible reservations are send as open sales orders.'
+          minimum: 0
+          example: 50
+        estimated_date:
+          type: string
+          minLength: 1
+          format: date
+          description: 'For type SALES_ORDER: Requested/confirmed outbound delivery date. The date must reflect the time when the stock must be available for fulfilling an order. It does not reflect the actual date when the goods are delivered to the customer. For type BATCH_BALANCE: Last valid date ("Best before date") for the batch. Batch balance is expected to become non-sellable at the end of this date.'
+          example: '2018-07-01'
+        type:
+          type: string
+          minLength: 1
+          description: Type of the transaction. Must be one of BALANCE, BATCH_BALANCE or SALES_ORDER (=open sales order).
+          example: BALANCE
+          enum:
+          - BALANCE
+          - BATCH_BALANCE
+          - SALES_ORDER
+        time:
+          description: If balances are sent multiple times during the day, indicates the time (24h clock hh:mm) of the balance or batch balance information, i.e. when it was fetched from source system
+          $ref: '#/components/schemas/time'
+      required:
+      - product
+      - location
+      - date
+      - sales_orders_quantity
+      - estimated_date
+      - type
+      $schema: https://json-schema.org/draft/2020-12/schema
+      additionalProperties: false
+    retail_delivery_request_body:
+      type: object
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        meta:
+          type: object
+          $ref: '#/components/schemas/inbound_meta'
+        data:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/delivery'
+    end_customer_transaction:
+      type: object
+      properties:
+        date:
+          type: string
+          minLength: 1
+          format: date
+          description: Date of the end customer transaction. In sales, reflects the change of ownership.
+          example: '2024-09-23'
+        product:
+          type: string
+          minLength: 1
+          description: Item code of finished productor stock keeping unit.
+          example: '80903'
+        end_customer:
+          type: string
+          minLength: 1
+          description: Inventory end customer code.
+          example: '5500'
+        type:
+          type: string
+          minLength: 1
+          description: Type of the transaction (SALE).
+          example: SALE
+          enum:
+          - SALE
+          - SALE_OUT
+        sales_quantity:
+          type:
+          - number
+          - 'null'
+          description: Sales quantity in base unit of measure (e.g. peices). Quantity sign defines the transaction direction as seen by the location, e.g. outgoing sales is sent as negative quantity. Transaction quantity determines the direction of the transaction.
+          example: 1.99
+        transaction_uid:
+          type:
+          - string
+          - 'null'
+          description: Transaction UID. Unique identifier for transaction row. Can be used as key for updates to the row.
+          example: TID12345
+        picking_date:
+          type:
+          - string
+          - 'null'
+          minLength: 1
+          format: date
+          description: 'Date when delivery for the sales order (type: SALE) was picked from source location.'
+          example: '2025-03-03'
+        time:
+          description: Time of the transaction (24h clock hh:mm)
+          $ref: '#/components/schemas/time'
+        source_location:
+          type:
+          - string
+          - 'null'
+          description: For SALE, the warehouse location from where the goods were delivered to end customer. For SALE_OUT not relevant.
+          example: DC123
+        sales_value:
+          type:
+          - number
+          - 'null'
+          description: Value as of revenue of the whole transaction, in currency defined in currency field, excluding sales taxes (e.g. VAT). Always positive - transaction quantity sign determines the direction of the transaction.
+          example: 230
+        currency:
+          type:
+          - string
+          - 'null'
+          description: Currency of the sales value.
+          example: USD
+        reference:
+          type:
+          - string
+          - 'null'
+          description: Customer (sales) order number related to sale.
+          example: S1234567
+        order_row:
+          type:
+          - string
+          - 'null'
+          description: Customer (sales) order row number related to sale.
+          example: '10'
+        batch_code:
+          type:
+          - string
+          - 'null'
+          description: Batch code. Unique identifier for the sold batch.
+          example: B1234
+        cost_of_goods_sold:
+          type:
+          - number
+          - 'null'
+          description: Cost of goods sold. The standard cost or purchase price of the sales transaction row.
+          example: 200
+      required:
+      - date
+      - product
+      - end_customer
+      - type
+      - sales_quantity
+      $schema: https://json-schema.org/draft/2020-12/schema
+      additionalProperties: false
+    daily_sale:
+      type: object
+      properties:
+        date:
+          type: string
+          minLength: 1
+          format: date
+          description: Transaction posting date
+          example: '2020-12-15'
+        location:
+          type: string
+          description: Location code. Reference to Locations.
+          example: LOCATION1
+          minLength: 1
+        product:
+          type: string
+          description: Product code. Reference to Products.
+          example: PRODUCT1
+          minLength: 1
+        quantity:
+          type: number
+          description: Transaction quantity in inventory units (e.g. pieces). Quantity sign defines the transaction direction as seen by the warehouse, e.g. outgoing sales is sent as negative quantity. All quantities should be given in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit).
+          example: -1
+        type:
+          type: string
+          minLength: 1
+          description: 'Type of the transaction: SALE'
+          example: SALE
+          enum:
+          - SALE
+        transaction_uid:
+          type:
+          - string
+          - 'null'
+          description: 'Unique identifier for transaction row. '
+          example: TID12345
+        value:
+          type:
+          - number
+          - 'null'
+          description: Value as of revenue of the whole transaction in the location's currency (e.g. €, £, $) excluding sales taxes (e.g. VAT). Value should always be positive as transaction quantity determines the direction of the transaction.
+          example: 15
+      required:
+      - date
+      - location
+      - product
+      - quantity
+      - type
+      $schema: https://json-schema.org/draft/2020-12/schema
+      additionalProperties: false
+    retail_transfer_request_body:
+      type: object
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        meta:
+          type: object
+          $ref: '#/components/schemas/inbound_meta'
+        data:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/transfer'
+    balance:
+      type: object
+      properties:
+        type:
+          type: string
+          minLength: 1
+          description: 'Supported balance types are: BALANCE = Current physical stock level'
+          example: BALANCE
+          enum:
+          - BALANCE
+        product:
+          type: string
+          minLength: 1
+          description: Product code (code for finished product or stock keeping unit). Reference to Products.
+          example: PRODUCT1
+        location:
+          type: string
+          minLength: 1
+          description: Inventory location code (i.e. code for affected store, warehouse, etc.). Reference to Locations.
+          example: LOCATION1
+        date:
+          type: string
+          minLength: 1
+          format: date
+          description: Balance date i.e. date of the product-location balance. Previous day's date in the daily transfer. For historical balances the date of the balance.
+          example: '2018-09-30'
+        balance:
+          type: number
+          description: Physical balance quantity in the location in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit). Balance quantity should be always positive and possible reservations are send as open sales orders.
+          example: 15
+        value:
+          type:
+          - number
+          - 'null'
+          description: Value of the whole transaction in the location's currency (e.g. €, £, $). Value should always be positive as transaction quantity determines the direction of the transaction. Usually based on purchase price. Negative values are automatically converted to the positive absolute value of the inserted value.
+          minimum: 0
+          example: 29.85
+        time:
+          description: If balances are sent multiple times during the day, indicates the time of the balance information, i.e. when it was fetched from source system
+          $ref: '#/components/schemas/time'
+      required:
+      - type
+      - product
+      - location
+      - date
+      - balance
+      $schema: https://json-schema.org/draft/2020-12/schema
+      additionalProperties: false
+    footfall_count:
+      type: object
+      properties:
+        date:
+          type: string
+          minLength: 1
+          format: date
+          description: Date of the footfall observation.
+          example: '2018-01-01'
+        location:
+          type: string
+          minLength: 1
+          description: Location where the footfall observation is done
+          example: LOCATION1
+        quantity:
+          type: number
+          description: The footfall count in a location at specificed date and time bucket.
+          example: 50
+        time:
+          description: 'Time of the footfall observation.  Footfall count is aggregated to time buckets, recommended bucket size is 15 minutes. For example: If time bucket size is 15 minutes, then row with time 11:00 include aggregated footfall 11:00:00-11:14:59'
+          pattern: ^(2[0-3]|[01]?[0-9]):([0-5]?[0-9])$
+          type: string
+          example: '15:05'
+      required:
+      - date
+      - location
+      - time
+      - quantity
+      $schema: https://json-schema.org/draft/2020-12/schema
+      additionalProperties: false
+    retail_spoilage_request_body:
+      type: object
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        meta:
+          type: object
+          $ref: '#/components/schemas/inbound_meta'
+        data:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/spoilage'
+    inventory_check:
+      type: object
+      properties:
+        type:
+          type: string
+          minLength: 1
+          description: Type of the transaction. Always INVENTORY_CHECK.
+          example: INVENTORY_CHECK
+          enum:
+          - INVENTORY_CHECK
+        product:
+          type: string
+          minLength: 1
+          description: Product code. Reference to Products.
+          example: PRODUCT1
+        location:
+          type: string
+          minLength: 1
+          description: Location code. Reference to Locations.
+          example: LOCATION1
+        date:
+          type: string
+          minLength: 1
+          format: date
+          description: Transaction posting date.
+          example: '2018-09-15'
+        quantity:
+          type: number
+          description: Transaction quantity in inventory units (e.g. pieces). Quantity sign defines the transaction direction as seen by the warehouse, e.g. outgoing sales is sent as negative quantity. All quantities should be given in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit).
+          example: 17
+        transaction_uid:
+          type:
+          - string
+          - 'null'
+          description: Transaction UID. Unique identifier for transaction row. Can be used as key for updates to the row.
+          example: TID12345
+        value:
+          type:
+          - number
+          - 'null'
+          description: Value of the whole transaction in the location's currency (e.g. €, £, $). Value should always be positive. Transaction quantity determines the direction of the transaction.
+          minimum: 0
+          example: 33.83
+        partner_code:
+          type:
+          - string
+          - 'null'
+          description: 'Defines the partner related to the transaction, usually: -Sales transactions: Customer; -Incoming deliveries: Supplier; -Stock transfers: Sending/receiving warehouse'
+          example: SUPPLIER1
+        reference:
+          type:
+          - string
+          - 'null'
+          description: Sales or purchase order number related to sale or goods receival transaction.
+          example: ORDER_12345
+        order_row:
+          type:
+          - string
+          - 'null'
+          description: Sales or purchase order row number related to sale or goods receival transaction.
+          example: '1'
+        order_type:
+          type:
+          - string
+          - 'null'
+          description: Additional transaction type. E.g. delivery channel for deliveries (from supplier, from DC)
+          example: DC
+        time:
+          description: Time of the transaction (24h clock hh:mm)
+          $ref: '#/components/schemas/time'
+        expiration_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Expiration date of the goods received.
+          example: '2018-06-01'
+      required:
+      - type
+      - product
+      - location
+      - date
+      - quantity
+      $schema: https://json-schema.org/draft/2020-12/schema
+      additionalProperties: false
+    retail_sales_forecasts:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      $id: /schema/generic_export/sales_forecasts/1.json
+      type: object
+      additionalProperties: false
+      required:
+      - meta
+      - data
+      properties:
+        meta:
+          type: object
+          additionalProperties: false
+          required:
+          - exported_at
+          - configured_at
+          - primary_resource
+          - schema
+          default: {}
+          title: Response metadata
+          properties:
+            exported_at:
+              type: string
+              format: date-time
+              title: Exported At
+              description: The time the content was exported
+              example: '2024-05-29T04:12:15.267Z'
+            configured_at:
+              type: string
+              format: date-time
+              title: Configured At
+              description: The time the response was configured at the host system. This can be used to detect updates for the schema.
+              example: '2023-11-21T08:16:54.908Z'
+            primary_resource:
+              type: string
+              title: Primary Resource
+              description: The primary resource for the data
+              example: sales_forecasts
+            schema:
+              type: string
+              title: Schema Path
+              description: The schema path for the data
+              example: /schema/generic_export/sales-forecasts/1.json
+        data:
+          type: array
+          additionalProperties: false
+          required: []
+          title: Data Records
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              product_code:
+                type: string
+                title: Product code
+                description: Product code in ERP system
+                example: abc_7593485671
+              product_name:
+                type: string
+                title: Product name
+                description: Product name
+                example: name abc
+              location_code:
+                type: string
+                title: Location code
+                description: Location code
+                example: abc_5673485990
+              supplier_code:
+                type: string
+                title: Supplier code
+                description: Supplier code
+                example: DC1
+              date:
+                type: string
+                format: date
+                title: Date
+                description: Date of the sales forecast
+                example: '2024-05-29'
+              effective_quantity:
+                type: number
+                title: Effective forecast quantity
+                description: Sum of baseline quantity, campaign addition, additional quantity and external addition. Corrected quantities are used for baseline forecast, campaign addition and external addition, if set. If corrected effective quantity is set, it will override the calculated value.
+                example: '1.23'
+              comment:
+                type: string
+                title: Comment
+                description: Optional comment for the sales forecast.
+                example: comment
+    retail_inventory_event_request_body:
+      type: object
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        meta:
+          type: object
+          $ref: '#/components/schemas/inbound_meta'
+        data:
+          type: array
+          items:
+            type: array
+            items:
+              type: object
+              $ref: '#/components/schemas/inventory_event'
+    retail_lost_sale_request_body:
+      type: object
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        meta:
+          type: object
+          $ref: '#/components/schemas/inbound_meta'
+        data:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/lost_sale'
+    retail_inventory_check_request_body:
+      type: object
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        meta:
+          type: object
+          $ref: '#/components/schemas/inbound_meta'
+        data:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/inventory_check'
+    open_purchase_order:
+      $comment: NOTE!! Any changes to this schema MUST BE MADE also in the goods_received.json schema file that contains this schema as a nested property!
+      type: object
+      properties:
+        type:
+          type: string
+          minLength: 1
+          description: ORDER = Open purchase order (can be linked to DELIVERY with a reference number)
+          example: ORDER
+          enum:
+          - ORDER
+        product:
+          type: string
+          minLength: 1
+          description: Product code (code for finished product or stock keeping unit). Reference to Products.
+          example: PRODUCT1
+        location:
+          type: string
+          minLength: 1
+          description: Inventory location code (i.e. for affected store, warehouse etc.). Reference to Locations.
+          example: LOCATION1
+        date:
+          type: string
+          minLength: 1
+          format: date
+          description: Snapshot's date. The open order row has to be received every day the order remains open. Once it's delivered, the open order row is not sent anymore. For example, if an order is created on Jan 3rd and the snapshot date is Jan 8th, then the date field will contain '2018-01-08' assuming the order is still open Jan 8th. Snapshot's date is usually previous day's date except if reading in historical open orders.
+          example: '2018-05-25'
+        quantity:
+          type: number
+          description: Open order quantity in inventory units (e.g. pieces). Quantity sign defines the transaction direction as seen by the warehouse, e.g. incoming purchase order is sent as positive quantity. All quantities should be given in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit).
+          example: 24
+        value:
+          type:
+          - number
+          - 'null'
+          description: Value of the whole transaction in the location's currency (e.g.€, £, $). Value should always be positive. Transaction quantity determines the direction of the transaction.
+          minimum: 0
+          example: 47.76
+        estimated_date:
+          type: string
+          format: date
+          description: Estimated delivery date of the order.
+          example: '2018-06-01'
+        order_requested_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Requested delivery date of the order. Can be used for measuring delivery accuracy.
+          example: '2019-07-03'
+        reference:
+          type:
+          - string
+          - 'null'
+          description: Purchase order number. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
+          example: ORDER_12345
+        order_row:
+          type:
+          - string
+          - 'null'
+          description: Purchase order row number. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
+          example: '1'
+        order_proposal_reference:
+          type:
+          - number
+          - 'null'
+          description: RELEX order proposal reference number. The order proposal number sent by RELEX to track open purchase orders.
+          example: 5314130
+        transaction_uid:
+          type:
+          - string
+          - 'null'
+          description: Transaction UID. Unique identifier for transaction row. Can be used as key for updates to the row.
+          example: TID12345
+        order_type:
+          type:
+          - string
+          - 'null'
+          description: Additional order type that can be used to distinct normal open orders from special open orders.
+          example: SPECIAL_PURCHASE_ORDER
+        partner_code:
+          type:
+          - string
+          - 'null'
+          description: Supplier code for purchase orders.
+          example: SUPPLIER1
+        estimated_delivery_time:
+          description: Estimated delivery time (24h clock hh:mm)
+          $ref: '#/components/schemas/time'
+        expiration_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Expiration date of the goods to be received.
+          example: '2020-09-18'
+      required:
+      - type
+      - product
+      - location
+      - date
+      - quantity
+      - estimated_date
+      $schema: https://json-schema.org/draft/2020-12/schema
+      additionalProperties: false
+    sale:
+      type: object
+      properties:
+        receipt_timestamp:
+          type: string
+          format: date-time
+          description: Closing time of the receipt.
+          example: '2024-05-29T04:12:15.267Z'
+        receipt_code:
+          type: string
+          description: Receipt number for normal sales. In case sales transaction fulfils an open sales order (ecom or B2B), the order number of the sales order
+          example: '6547321564'
+        date:
+          type: string
+          minLength: 1
+          format: date
+          description: Transaction posting date.
+          example: '2018-05-01'
+        time:
+          description: Time of the transaction (24h clock hh:mm)
+          pattern: ^(2[0-3]|[01]?[0-9]):([0-5]?[0-9])$
+          type: string
+          example: '15:05'
+        location:
+          type: string
+          description: Location code. Reference to Locations.
+          example: LOCATION1
+          minLength: 1
+        product:
+          type: string
+          description: Product code. Reference to Products.
+          example: PRODUCT1
+          minLength: 1
+        quantity:
+          type: number
+          description: Transaction quantity in inventory units (e.g. pieces). Quantity sign defines the transaction direction as seen by the warehouse, e.g. outgoing sales is sent as negative quantity. All quantities should be given in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit).
+          example: -1
+        receipt_row_number:
+          type: integer
+          minimum: 0
+          description: Uniquely identifies the row together with the receipt code. Must be non-negative.
+          example: 1234
+        value:
+          type:
+          - number
+          - 'null'
+          description: Value of the whole transaction in the location's currency (e.g.£, €, $). Value should always be positive. Transaction quantity determines the direction of the transaction.
+          minimum: 0
+          example: 7.99
+        sales_value_with_tax:
+          type:
+          - number
+          - 'null'
+          minimum: 0
+          description: Value of the whole transaction including sales taxes (VAT) in the location's currency (e.g.€, £, $). Value should always be non-negative. (Transaction quantity determines the direction of the transaction.)
+          example: 17
+        tax_amount:
+          type:
+          - number
+          - 'null'
+          description: The amount of the tax. Used for tax calulcations in Pricing & Promotions, not needed for F&R.
+          example: 2
+        sales_tax_rate:
+          type:
+          - number
+          - 'null'
+          description: Rate of the sales tax, VAT, GST or similar sales-related tax. Used for tax calulcations in Pricing & Promotions, not needed for F&R.
+          example: 0.12
+        purchase_price:
+          type:
+          - number
+          - 'null'
+          description: Purchase cost of sales transaction - this allows sales margin calculation.
+          example: 1.99
+        loyalty_customer_type:
+          type:
+          - string
+          - 'null'
+          description: 'Consumer''s loyalty level, if any. Can have values such as: "No", "Basic", "Gold", "Platinum" but these are not tighly restricted'
+          example: Platinum
+        fulfillment_type:
+          type:
+          - string
+          - 'null'
+          description: The method in which the sale was fulfilled.
+          example: Home delivery
+        delivery_zip_code:
+          type:
+          - string
+          - 'null'
+          description: ZIP (postal) code of the region to which a delivery is made.
+          example: '12345'
+        loyalty_customer_zip_code:
+          type:
+          - string
+          - 'null'
+          description: ZIP (postal) code of the address of a loyalty customer.
+          example: '12345'
+        campaign_code:
+          type:
+          - string
+          - 'null'
+          description: In case sales row includes a campaign discount, code of the related campaign. Can include multiple campaign codes separated by comma (,).
+          example: May_discount
+        transaction_campaign_code:
+          type:
+          - string
+          - 'null'
+          description: Transaction campaign code used for Promotion Planning. In case sales row includes a campaign discount, code of the related campaign. Can include multiple campaign codes separated by comma (,).
+          example: May_discount
+        original_sales_value:
+          type:
+          - number
+          - 'null'
+          description: The list price of the sales row without campaign or other discounts excluding sales tax
+          example: 17
+        original_sales_value_with_tax:
+          type:
+          - number
+          - 'null'
+          description: The list price of the sales row without campaign or other discounts including  sales tax
+          example: 20
+        promotion_discount:
+          type:
+          - number
+          - 'null'
+          description: Promotion/campaign discount %.
+          example: 0.21
+        transaction_promotion_discount:
+          type:
+          - number
+          - 'null'
+          description: Campaign discount used for Promotion Planning
+          example: 0.21
+        discount:
+          type:
+          - number
+          - 'null'
+          description: Non-promotional row discount (%), e.g. markdown or given by sales rep. The reason for the discount can be elaborated in the "Discount reason" field..
+          example: 0.12
+        discount_reason:
+          type:
+          - string
+          - 'null'
+          description: Reason for row discount
+          example: Markdown
+        checkout_code:
+          type:
+          - string
+          - 'null'
+          description: Identifier of the checkout where the sale took place. For example cash or cashier number
+          example: '1'
+        checkout_type:
+          type:
+          - string
+          - 'null'
+          description: Checkout type, e.g. self-service checkout vs cashier staffed checkout vs service desk
+          example: Self-service
+        partner_code:
+          type:
+          - string
+          - 'null'
+          description: 'B2B trading partner to whom goods are sold NOTE: Trading partner must not be individual consumer (i.e. loyalty code), as interface must not contain personal data that may fall under any privacy regulation'
+          example: C01234
+        order_type:
+          type:
+          - string
+          - 'null'
+          description: Additional subtype for sales transactions that can be used to distinct normal sales from special sales and deliveries (e.g. if project sales need to be reported separately from normal sales).
+          example: SPECIAL_SALE
+          enum:
+          - MARKDOWN_SALE
+          - SPECIAL_SALE
+          - UNUSUAL_SALE
+          - null
+        row_timestamp:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Scanning time of an individual product.
+          example: '2024-05-29T04:12:15.267Z'
+      required:
+      - date
+      - product
+      - location
+      - time
+      - quantity
+      - receipt_code
+      - receipt_row_number
+      - receipt_timestamp
+      $schema: https://json-schema.org/draft/2020-12/schema
+      additionalProperties: false
+    retail_order_proposals:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      $id: /schema/generic_export/proposal-sample/1.json
+      type: object
+      additionalProperties: false
+      required:
+      - meta
+      - data
+      properties:
+        meta:
+          type: object
+          additionalProperties: false
+          required:
+          - exported_at
+          - configured_at
+          - primary_resource
+          - schema
+          default: {}
+          title: Response metadata
+          properties:
+            exported_at:
+              type: string
+              format: date-time
+              title: Exported At
+              description: The time the content was exported
+              example: '2024-05-29T04:12:15.267Z'
+            configured_at:
+              type: string
+              format: date-time
+              title: Configured At
+              description: The time the response was configured at the host system. This can be used to detect updates for the schema.
+              example: '2023-11-21T08:16:54.908Z'
+            primary_resource:
+              type: string
+              title: Primary Resource
+              description: The primary resource for the data
+              example: order_proposals
+            schema:
+              type: string
+              title: Schema Path
+              description: The schema path for the data
+              example: /schema/generic_export/order_proposals/1.json
+        data:
+          type: array
+          additionalProperties: false
+          required: []
+          title: Data Records
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              order_number:
+                type: integer
+                title: Order number
+                description: Row level unique order number. Can be used to identify the order.
+                example: 90100
+              send_run_id:
+                type: integer
+                title: Send run id
+                description: Run id (number) of the job from which the order proposal row was sent out from RELEX. Can be used for troubleshooting and identifying when a specific order was sent.
+                example: 1213
+              product_code:
+                type: string
+                title: Product code
+                description: Product code. Identifier of the product.
+                example: abc_5648489057
+              location_code:
+                type: string
+                title: Location code
+                description: Location code. Identifier of the location/warehouse.
+                example: abc_3712470314
+              supplier_code:
+                type: string
+                title: Supplier code
+                description: Supplier of the order proposal.
+                example: abc_2648891291
+              effective_quantity:
+                type: number
+                title: Effective quantity
+                description: Amount of products to be ordered in base unit of measure.
+                example: 125
+              date:
+                type: string
+                format: date
+                title: Date
+                description: Order date, i.e. the date on which the purchase order is created. Current date for normal order proposals, future date for reserve order proposals.
+                example: '2024-05-29'
+              delivery_date:
+                type: string
+                format: date
+                title: Delivery date
+                description: Requested delivery date for goods receival to location/warehouse.
+                example: '2024-05-29'
+              second_delivery_date:
+                type: string
+                format: date
+                title: Delivery date
+                description: Next possible delivery date after the delivery date of current order proposal row for the product-location.
+                example: '2024-06-29'
+              order_type:
+                type: string
+                title: Type
+                description: 'Defines the type of the order proposal: NORMAL => Normal, SECONDARY => Secondary (i.e. not main delivery date order), EXTRA => Extra order, INITIAL_REPLENISHMENT => Campaign Initial replenishment, ALLOCATION => Allocation, FUTURE_ALLOCATION => Future allocation, FORCEOUT_ALLOCATION => Allocation: Force-out, FORCEOUT_FUTURE_ALLOCATION => Future allocation: Force-out, FILL => Fill, IN_ADVANCE => Order in advance, FUTURE => Reserve order proposal, FUTURE_SECONDARY => Reserve order proposal, secondary order, FUTURE_INITIAL_REPLENISHMENT => Reserve order proposal, campaign initial replenishment, FUTURE_FILL => Reserve order proposal, fill, DAILY => Daily order, DAILY_FILL => Daily fill order, DAILY_SECONDARY => Daily secondary order,PRE_PACK_STARTUP => Prepack startup allocation, PRE_PACK_REPLENISHMENT => Prepack replenishment allocation, PRE_ORDER => Pre-order, EXTERNAL => External order, OTG_MANUAL => Manual order created in RELEX On-the-go Replenishment'
+                example: NORMAL
+                enum:
+                - ALLOCATION
+                - DAILY
+                - DAILY_FILL
+                - DAILY_SECONDARY
+                - EXTERNAL
+                - EXTRA
+                - FILL
+                - FORCEOUT_ALLOCATION
+                - FORCEOUT_FUTURE_ALLOCATION
+                - FUTURE
+                - FUTURE_ALLOCATION
+                - FUTURE_FILL
+                - FUTURE_INITIAL_REPLENISHMENT
+                - FUTURE_SECONDARY
+                - INITIAL_REPLENISHMENT
+                - IN_ADVANCE
+                - NORMAL
+                - OTG_MANUAL
+                - PRE_ORDER
+                - PRE_PACK_REPLENISHMENT
+                - PRE_PACK_STARTUP
+                - SECONDARY
+              comment_1:
+                type: string
+                title: Comment 1
+                description: Free comment text 1. Information only, not used in calculations.
+                example: comment 1
+              comment_2:
+                type: string
+                title: Comment 2
+                description: Free comment text 2. Information only, not used in calculations.
+                example: comment 2
+    outbound_list_endpoint:
+      $schema: http://json-schema.org/draft-04/schema#
+      type: object
+      properties:
+        meta:
+          type: object
+          properties:
+            type:
+              type: string
+              description: Type of the export
+              example: data.namespace.custom_export_resource.available
+            requested_at:
+              type: string
+              description: A timestamp of the moment the request was served
+              example: '2024-06-12T07:03:41+00:00'
+          required: []
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: File identifier
+                example: 43ee6e0c-6341-418f-a4e9-4029ec86f16a
+              timestamp:
+                type: string
+                description: The time when the file was exported
+                example: '2024-05-29T04:12:16.102371Z'
+              downloaded:
+                type: string
+                description: Has the file been tried to download before. Set to 'false' upon file creation. A successful start of a download sets this to 'true'.
+                example: 'false'
+              url:
+                type: string
+                description: URL-path of the file. Use this when downloading.
+                example: /data/namespace/custom_export_resource/43ee6e0c-6341-418f-a4e9-4029ec86f16a
+              resource:
+                type: string
+                description: Resource name
+                example: custom_export_resource
+            required: []
+      required: []
+    retail_special_delivery_request_body:
+      type: object
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        meta:
+          type: object
+          $ref: '#/components/schemas/inbound_meta'
+        data:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/special_delivery'
+    problem_details_general:
+      description: Implementation of [RFC7807](https://tools.ietf.org/html/rfc7807) Problem Details object.  Content type should always be ```application/problem+json```.  Problem type definitions MAY extend the problem details object with additional members
+      type: object
+      required:
+      - type
+      - title
+      - status
+      properties:
+        type:
+          description: A URI reference [RFC3986] that identifies the problem type.
+          type: string
+          format: uri
+          example: https://relexsolutions.com/issue
+        title:
+          description: A short, human-readable summary of the problem type.
+          type: string
+          example: Bad Request
+        status:
+          description: The HTTP status code ([RFC7231], Section 6) generated by the origin server for this occurrence of the problem.
+          type: number
+          example: 400
+        detail:
+          description: A human-readable explanation specific to this occurrence of the problem.
+          type: string
     order:
       type: object
       properties:
@@ -1053,246 +2162,153 @@ components:
       - estimated_date
       $schema: https://json-schema.org/draft/2020-12/schema
       additionalProperties: false
-    retail_order_request_body:
+    problem_details_400:
+      description: Implementation of [RFC7807](https://tools.ietf.org/html/rfc7807) Problem Details object.  Content type should always be ```application/problem+json```.  Problem type definitions MAY extend the problem details object with additional members
       type: object
       required:
-      - data
-      additionalProperties: false
+      - type
+      - title
+      - status
       properties:
-        meta:
-          type: object
-          $ref: '#/components/schemas/inbound_meta'
-        data:
+        type:
+          description: A URI reference [RFC3986] that identifies the problem type.
+          type: string
+          format: uri
+          example: https://relexsolutions.com/rest/errors/400
+        title:
+          description: A short, human-readable summary of the problem type.
+          type: string
+          example: Bad Request
+        status:
+          description: The HTTP status code ([RFC7231], Section 6) generated by the origin server for this occurrence of the problem.
+          type: number
+          example: 400
+        detail:
+          description: A human-readable explanation specific to this occurrence of the problem.
+          type: string
+          example: validating the payload's JSON schema failed
+        debugging:
+          description: Debugging information for DEV and QA environments.
+          type: string
+        validation_errors:
           type: array
+          description: A list of issues that exist with the request.
           items:
             type: object
-            $ref: '#/components/schemas/order'
-    batch_balance:
+            properties:
+              location:
+                type: string
+              message:
+                type: string
+              violation:
+                type: string
+          example:
+          - location: /data/0
+            message: 'missing properties: ''code'''
+            violation: required
+          - location: /meta/example
+            message: expected string, but got number
+            violation: type
+    lost_sale:
       type: object
       properties:
         type:
           type: string
           minLength: 1
-          description: 'Supported balance type: BATCH_BALANCE = Current physical stock divided to batches based on spoiling date'
-          example: BATCH_BALANCE
+          description: Type of the transaction. Always LOST_SALE.
+          example: LOST_SALE
           enum:
-          - BATCH_BALANCE
+          - LOST_SALE
         product:
           type: string
           minLength: 1
-          description: Item code (code for finished product or stock keeping unit)
+          description: Product code. Reference to Products.
           example: PRODUCT1
-        location:
-          type: string
-          minLength: 1
-          description: Inventory location code (i.e. code for affected store, warehouse, etc.). Reference to Locations.
-          example: LOCATION1
-        date:
-          type: string
-          minLength: 1
-          format: date
-          description: Balance date i.e. date of the batch balance. Previous day's date in the daily transfer. For historical balances the date of the balance.
-          example: '2018-09-30'
-        balance:
-          type: number
-          description: "Physical batch balance quantity in the location in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit). \nBatch balance quantity should be always positive and the sum of non-expired batch balances should equal the normal balance."
-          example: 3
-        value:
-          type:
-          - number
-          - 'null'
-          description: Value of the whole transaction in the location's currency (e.g. €, £, $). Value should always be positive as transaction quantity determines the direction of the transaction. Usually based on purchase price. Negative values are automatically converted to the positive absolute value of the inserted value.
-          minimum: 0
-          example: 5.97
-        time:
-          description: If batch balances are sent multiple times during the day, indicates the time when balance was fetched from source system
-          $ref: '#/components/schemas/time'
-        estimated_date:
-          type: string
-          minLength: 1
-          format: date
-          description: Last valid date ('Best before date') for the batch. Batch balance is expected to become non-sellable at the end of this date. Forecasted spoilage in RELEX takes also product-location's required remaining shelf life into account (effective spoiling date = 'estimated_date' - 'required remaining shelf life').
-          example: '2018-10-05'
-        batch_manufacturing_date:
-          type:
-          - string
-          - 'null'
-          format: date
-          description: Date of manufacture of the batch. Only relevant for manufacturing customers.
-          example: '2018-10-05'
-        batch_code:
-          type:
-          - string
-          - 'null'
-          description: Unique identifier for the manufactured batch. Only relevant for manufacturing customers.
-          example: MB103938485
-        production_date:
-          type:
-          - string
-          - 'null'
-          format: date
-          description: Production date. The date when the batch was produced.
-          example: '2025-03-01'
-        available_date:
-          type:
-          - string
-          - 'null'
-          format: date
-          description: Available date. When the batch is in quality control or ageing, the date when it is expected to be available for sale and consumption.
-          example: '2025-09-09'
-      required:
-      - type
-      - product
-      - location
-      - date
-      - balance
-      - estimated_date
-      $schema: https://json-schema.org/draft/2020-12/schema
-      additionalProperties: false
-    retail_workload_driver_forecasts_quarter:
-      $schema: https://json-schema.org/draft/2020-12/schema
-      $id: /schema/generic_export/workload_driver_forecasts_quarter/1.json
-      type: object
-      additionalProperties: false
-      required:
-      - meta
-      - data
-      properties:
-        meta:
-          type: object
-          additionalProperties: false
-          required:
-          - exported_at
-          - configured_at
-          - primary_resource
-          - schema
-          default: {}
-          title: Response metadata
-          properties:
-            exported_at:
-              type: string
-              format: date-time
-              title: Exported At
-              description: The time the content was exported
-            configured_at:
-              type: string
-              format: date-time
-              title: Configured At
-              description: The time the response was configured at the host system. This can be used to detect updates for the schema.
-            primary_resource:
-              type: string
-              title: Primary Resource
-              description: The primary resource for the data
-            schema:
-              type: string
-              title: Schema Path
-              description: The schema path for the data
-        data:
-          type: array
-          additionalProperties: false
-          required: []
-          title: Data Records
-          items:
-            type: object
-            additionalProperties: false
-            properties:
-              workload_driver_type_code:
-                type: string
-                title: Workload driver type code
-                description: Identifier of the type of the workload driver
-              location_code:
-                type: string
-                title: Location code
-                description: Identifier for location
-              effective_quantity:
-                type: number
-                title: Effective forecast quantity
-                description: Effective forecast quantity
-              date:
-                type: string
-                format: date
-                title: Date
-                description: Defines the date of the effective forecast
-              time:
-                type: string
-                format: time
-                title: Time
-                example: '14:15'
-                description: Defines the quarter of an hour of the effective forecast (hh:mm)
-    retail_lost_sale_request_body:
-      type: object
-      required:
-      - data
-      additionalProperties: false
-      properties:
-        meta:
-          type: object
-          $ref: '#/components/schemas/inbound_meta'
-        data:
-          type: array
-          items:
-            type: object
-            $ref: '#/components/schemas/lost_sale'
-    daily_sale:
-      type: object
-      properties:
-        date:
-          type: string
-          minLength: 1
-          format: date
-          description: Transaction posting date
-          example: '2020-12-15'
         location:
           type: string
           description: Location code. Reference to Locations.
           example: LOCATION1
-          minLength: 1
-        product:
+        date:
           type: string
-          description: Product code. Reference to Products.
-          example: PRODUCT1
           minLength: 1
+          format: date
+          description: Transaction posting date.
+          example: '2018-09-05'
         quantity:
           type: number
           description: Transaction quantity in inventory units (e.g. pieces). Quantity sign defines the transaction direction as seen by the warehouse, e.g. outgoing sales is sent as negative quantity. All quantities should be given in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit).
-          example: -1
-        type:
-          type: string
-          minLength: 1
-          description: 'Type of the transaction: SALE'
-          example: SALE
-          enum:
-          - SALE
+          example: 5
         transaction_uid:
           type:
           - string
           - 'null'
-          description: 'Unique identifier for transaction row. '
+          description: Transaction UID. Unique identifier for transaction row. Can be used as key for updates to the row.
           example: TID12345
         value:
           type:
           - number
           - 'null'
-          description: Value as of revenue of the whole transaction in the location's currency (e.g. €, £, $) excluding sales taxes (e.g. VAT). Value should always be positive as transaction quantity determines the direction of the transaction.
-          example: 15
+          description: Value of the whole transaction in the location's currency (e.g. €, £, $). Value should always be positive. Transaction quantity determines the direction of the transaction.
+          minimum: 0
+          example: 44.95
+        purchase_price:
+          type:
+          - number
+          - 'null'
+          description: Purchase cost of sales transaction - this allows sales margin calculation.
+          example: 9.95
+        partner_code:
+          type:
+          - string
+          - 'null'
+          description: Supplier code for incoming deliveries.
+          example: SUPPLIER1
+        reference:
+          type:
+          - string
+          - 'null'
+          description: Purchase order number related to goods receival transaction. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
+          example: ORDER_12345
+        order_row:
+          type:
+          - string
+          - 'null'
+          description: Purchase order row number related to goods receival transaction. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
+          example: '1'
+        order_type:
+          type:
+          - string
+          - 'null'
+          description: Additional transaction type. E.g. delivery channel for deliveries (from supplier, from DC)
+          example: DC
+        time:
+          description: Time of the transaction (24h clock hh:mm)
+          $ref: '#/components/schemas/time'
+        expiration_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Expiration date of the goods received.
+          example: '2018-06-01'
       required:
-      - date
-      - location
-      - product
-      - quantity
       - type
+      - product
+      - location
+      - date
+      - quantity
       $schema: https://json-schema.org/draft/2020-12/schema
       additionalProperties: false
-    transfer:
+    spoilage:
       type: object
       properties:
         type:
           type: string
           minLength: 1
-          description: Type of the transaction. Always TRANSFER.
-          example: TRANSFER
+          description: Type of the transaction. Always SPOILAGE.
+          example: SPOILAGE
           enum:
-          - TRANSFER
+          - SPOILAGE
         product:
           type: string
           minLength: 1
@@ -1308,11 +2324,11 @@ components:
           minLength: 1
           format: date
           description: Transaction posting date.
-          example: '2018-07-01'
+          example: '2018-09-01'
         quantity:
           type: number
           description: Transaction quantity in inventory units (e.g. pieces). Quantity sign defines the transaction direction as seen by the warehouse, e.g. outgoing sales is sent as negative quantity. All quantities should be given in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit).
-          example: -2
+          example: -1
         transaction_uid:
           type:
           - string
@@ -1325,40 +2341,10 @@ components:
           - 'null'
           description: Value of the whole transaction in the location's currency (e.g.€, £, $). Value should always be positive. Transaction quantity determines the direction of the transaction.
           minimum: 0
-          example: 3.98
-        partner_code:
-          type:
-          - string
-          - 'null'
-          description: Sending/receiving warehouse code for stock transfers.
-          example: DC1
-        reference:
-          type:
-          - string
-          - 'null'
-          description: Purchase order number related to goods receival transaction. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
-          example: ORDER_12345
-        order_row:
-          type:
-          - string
-          - 'null'
-          description: Purchase order row number related to goods receival transaction. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
-          example: '1'
+          example: 1.99
         time:
           description: Time of the transaction (24h clock hh:mm)
           $ref: '#/components/schemas/time'
-        order_type:
-          type:
-          - string
-          - 'null'
-          description: Additional transaction type. E.g. delivery channel for deliveries (from supplier, from DC)
-          example: DC
-        purchase_price:
-          type:
-          - number
-          - 'null'
-          description: Purchase cost of the whole sales transaction
-          example: 24
         expiration_date:
           type:
           - string
@@ -1467,288 +2453,162 @@ components:
       - quantity
       $schema: https://json-schema.org/draft/2020-12/schema
       additionalProperties: false
-    retail_sale_request_body:
-      type: object
-      required:
-      - data
-      additionalProperties: false
-      properties:
-        meta:
-          type: object
-          $ref: '#/components/schemas/inbound_meta'
-        data:
-          type: array
-          items:
-            type: object
-            $ref: '#/components/schemas/sale'
-    goods_received:
-      type: object
-      properties:
-        product:
-          type: string
-          minLength: 1
-          description: Product code. Reference to Products.
-          example: PRODUCT1
-        location:
-          type: string
-          minLength: 1
-          description: Location code. Reference to Locations.
-          example: LOCATION1
-        balances:
-          type: array
-          items:
-            type: object
-            required:
-            - type
-            - date
-            - balance
-            properties:
-              type:
-                type: string
-                minLength: 1
-                description: Type of the transaction. Always BALANCE.
-                example: BALANCE
-                enum:
-                - BALANCE
-              date:
-                type: string
-                minLength: 1
-                format: date
-                description: The date of the recorded balance quantity. Usually previous day's date except if reading in historical balances.
-                example: '2018-09-30'
-              balance:
-                type: number
-                description: Physical balance quantity in the location in base unit of measure (e.g. pieces). RELEX calculates unreserved balance based on physical balance and open orders. Balance quantity should be always positive and possible reservations can be send as open sales orders. All quantities should be given in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit).
-                example: 15
-              value:
-                type:
-                - number
-                - 'null'
-                description: Book value of total quantity of the balance entry. Alternatively if book value is not available, the purchase value of the balance quantity can be used.
-                minimum: 0
-                example: 29.85
-              time:
-                description: Time of the transaction (24h clock hh:mm)
-                pattern: ^(2[0-3]|[01]?[0-9]):([0-5]?[0-9])$
-                type:
-                - string
-                - 'null'
-                example: '15:05'
-            $schema: https://json-schema.org/draft/2020-12/schema
-            additionalProperties: false
-        deliveries:
-          type: array
-          items:
-            type: object
-            required:
-            - type
-            - date
-            - quantity
-            properties:
-              type:
-                type: string
-                minLength: 1
-                description: Type of the transaction. Always DELIVERY or SPECIAL_DELIVERY.
-                example: DELIVERY
-                enum:
-                - DELIVERY
-                - SPECIAL_DELIVERY
-              date:
-                type: string
-                minLength: 1
-                format: date
-                description: Transaction posting date.
-                example: '2018-06-01'
-              quantity:
-                type: number
-                description: Transaction quantity in inventory units (e.g. pieces). Quantity sign defines the transaction direction as seen by the warehouse, e.g. outgoing sales is sent as negative quantity. All quantities should be given in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit).
-                example: 6
-              transaction_uid:
-                type:
-                - string
-                - 'null'
-                description: Transaction UID. Unique identifier for transaction row. Can be used as key for updates to the row.
-                example: TID12345
-              value:
-                type:
-                - number
-                - 'null'
-                description: Value of the whole transaction in the location's currency (e.g. €, £, $). Value should always be positive. (Transaction quantity determines the direction of the transaction.)
-                minimum: 0
-                example: 47.76
-              reference:
-                type:
-                - string
-                - 'null'
-                description: Purchase order number related to goods receival transaction. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
-                example: ORDER_12345
-              order_row:
-                type:
-                - string
-                - 'null'
-                description: Purchase order row number related to goods receival transaction. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
-                example: '1'
-              partner_code:
-                type:
-                - string
-                - 'null'
-                description: Supplier code for incoming deliveries.
-                example: SUPPLIER1
-              time:
-                description: Time of the transaction (24h clock hh:mm)
-                pattern: ^(2[0-3]|[01]?[0-9]):([0-5]?[0-9])$
-                type:
-                - string
-                - 'null'
-                example: '15:05'
-              order_type:
-                type:
-                - string
-                - 'null'
-                description: Additional transaction type. E.g. delivery channel for deliveries (from supplier, from DC)
-                example: DC
-              purchase_price:
-                type:
-                - number
-                - 'null'
-                description: Purchase cost of the whole sales transaction
-                example: 24
-              expiration_date:
-                type:
-                - string
-                - 'null'
-                format: date
-                description: Expiration date of the goods received.
-                example: '2018-06-01'
-            $schema: https://json-schema.org/draft/2020-12/schema
-            additionalProperties: false
-        open_purchase_orders:
-          type: array
-          items:
-            type: object
-            required:
-            - type
-            - date
-            - quantity
-            - estimated_date
-            properties:
-              type:
-                type: string
-                minLength: 1
-                description: ORDER = Open purchase order (can be linked to DELIVERY with a reference number)
-                example: ORDER
-                enum:
-                - ORDER
-              date:
-                type: string
-                minLength: 1
-                format: date
-                description: Snapshot's date. The open order row has to be received every day the order remains open. Once it's delivered, the open order row is not sent anymore. For example, if an order is created on Jan 3rd and the snapshot date is Jan 8th, then the date field will contain '2018-01-08' assuming the order is still open Jan 8th. Snapshot's date is usually previous day's date except if reading in historical open orders.
-                example: '2018-05-25'
-              quantity:
-                type: number
-                description: Open order quantity in inventory units (e.g. pieces). Quantity sign defines the transaction direction as seen by the warehouse, e.g. incoming purchase order is sent as positive quantity. All quantities should be given in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit).
-                example: 0
-              value:
-                type:
-                - number
-                - 'null'
-                description: Value of the whole transaction in the location's currency (e.g. €, £, $). Value should always be positive. Transaction quantity determines the direction of the transaction.
-                minimum: 0
-                example: 47.76
-              estimated_date:
-                type: string
-                format: date
-                description: Estimated delivery date of the order.
-                example: '2018-06-01'
-              order_requested_date:
-                type:
-                - string
-                - 'null'
-                format: date
-                description: Requested delivery date of the order. Can be used for measuring delivery accuracy.
-                example: '2019-07-03'
-              reference:
-                type:
-                - string
-                - 'null'
-                description: Purchase order number. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
-                example: ORDER_12345
-              order_row:
-                type:
-                - string
-                - 'null'
-                description: Purchase order row number. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
-                example: '1'
-              order_proposal_reference:
-                type:
-                - number
-                - 'null'
-                description: RELEX order proposal reference number. The order proposal number sent by RELEX to track open purchase orders.
-                example: 5314130
-              transaction_uid:
-                type:
-                - string
-                - 'null'
-                description: Transaction UID. Unique identifier for transaction row. Can be used as key for updates to the row.
-                example: TID12345
-              order_type:
-                type:
-                - string
-                - 'null'
-                description: Additional order type that can be used to distinct normal open orders from special open orders.
-                example: SPECIAL_PURCHASE_ORDER
-              partner_code:
-                type:
-                - string
-                - 'null'
-                description: Supplier code for purchase orders.
-                example: SUPPLIER1
-              estimated_delivery_time:
-                description: Estimated delivery time (24h clock hh:mm)
-                pattern: ^(2[0-3]|[01]?[0-9]):([0-5]?[0-9])$
-                type:
-                - string
-                - 'null'
-                example: '15:05'
-              expiration_date:
-                type:
-                - string
-                - 'null'
-                format: date
-                description: Expiration date of the goods to be received.
-                example: '2020-09-18'
-            $schema: https://json-schema.org/draft/2020-12/schema
-            additionalProperties: false
-      required:
-      - product
-      - location
+    retail_workload_driver_forecasts_day:
       $schema: https://json-schema.org/draft/2020-12/schema
-      additionalProperties: false
-    retail_delivery_request_body:
+      $id: /schema/generic_export/workload_driver_forecasts_day/1.json
       type: object
-      required:
-      - data
       additionalProperties: false
+      required:
+      - meta
+      - data
       properties:
         meta:
           type: object
-          $ref: '#/components/schemas/inbound_meta'
+          additionalProperties: false
+          required:
+          - exported_at
+          - configured_at
+          - primary_resource
+          - schema
+          default: {}
+          title: Response metadata
+          properties:
+            exported_at:
+              type: string
+              format: date-time
+              title: Exported At
+              description: The time the content was exported
+            configured_at:
+              type: string
+              format: date-time
+              title: Configured At
+              description: The time the response was configured at the host system. This can be used to detect updates for the schema.
+            primary_resource:
+              type: string
+              title: Primary Resource
+              description: The primary resource for the data
+            schema:
+              type: string
+              title: Schema Path
+              description: The schema path for the data
         data:
           type: array
+          additionalProperties: false
+          required: []
+          title: Data Records
           items:
             type: object
-            $ref: '#/components/schemas/delivery'
-    inventory_check:
+            additionalProperties: false
+            properties:
+              workload_driver_type_code:
+                type: string
+                title: Workload driver type code
+                description: Identifier of the type of the workload driver
+              location_code:
+                type: string
+                title: Location code
+                description: Identifier for location
+              effective_quantity:
+                type: number
+                title: Effective forecast quantity
+                description: Effective forecast quantity
+              date:
+                type: string
+                format: date
+                title: Date
+                description: Defines the date of the effective forecast
+    batch_balance:
       type: object
       properties:
         type:
           type: string
           minLength: 1
-          description: Type of the transaction. Always INVENTORY_CHECK.
-          example: INVENTORY_CHECK
+          description: 'Supported balance type: BATCH_BALANCE = Current physical stock divided to batches based on spoiling date'
+          example: BATCH_BALANCE
           enum:
-          - INVENTORY_CHECK
+          - BATCH_BALANCE
+        product:
+          type: string
+          minLength: 1
+          description: Item code (code for finished product or stock keeping unit)
+          example: PRODUCT1
+        location:
+          type: string
+          minLength: 1
+          description: Inventory location code (i.e. code for affected store, warehouse, etc.). Reference to Locations.
+          example: LOCATION1
+        date:
+          type: string
+          minLength: 1
+          format: date
+          description: Balance date i.e. date of the batch balance. Previous day's date in the daily transfer. For historical balances the date of the balance.
+          example: '2018-09-30'
+        balance:
+          type: number
+          description: "Physical batch balance quantity in the location in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit). \nBatch balance quantity should be always positive and the sum of non-expired batch balances should equal the normal balance."
+          example: 3
+        value:
+          type:
+          - number
+          - 'null'
+          description: Value of the whole transaction in the location's currency (e.g. €, £, $). Value should always be positive as transaction quantity determines the direction of the transaction. Usually based on purchase price. Negative values are automatically converted to the positive absolute value of the inserted value.
+          minimum: 0
+          example: 5.97
+        time:
+          description: If batch balances are sent multiple times during the day, indicates the time when balance was fetched from source system
+          $ref: '#/components/schemas/time'
+        estimated_date:
+          type: string
+          minLength: 1
+          format: date
+          description: Last valid date ('Best before date') for the batch. Batch balance is expected to become non-sellable at the end of this date. Forecasted spoilage in RELEX takes also product-location's required remaining shelf life into account (effective spoiling date = 'estimated_date' - 'required remaining shelf life').
+          example: '2018-10-05'
+        batch_manufacturing_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Date of manufacture of the batch. Only relevant for manufacturing customers.
+          example: '2018-10-05'
+        batch_code:
+          type:
+          - string
+          - 'null'
+          description: Unique identifier for the manufactured batch. Only relevant for manufacturing customers.
+          example: MB103938485
+        production_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Production date. The date when the batch was produced.
+          example: '2025-03-01'
+        available_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Available date. When the batch is in quality control or ageing, the date when it is expected to be available for sale and consumption.
+          example: '2025-09-09'
+      required:
+      - type
+      - product
+      - location
+      - date
+      - balance
+      - estimated_date
+      $schema: https://json-schema.org/draft/2020-12/schema
+      additionalProperties: false
+    transfer:
+      type: object
+      properties:
+        type:
+          type: string
+          minLength: 1
+          description: Type of the transaction. Always TRANSFER.
+          example: TRANSFER
+          enum:
+          - TRANSFER
         product:
           type: string
           minLength: 1
@@ -1764,11 +2624,11 @@ components:
           minLength: 1
           format: date
           description: Transaction posting date.
-          example: '2018-09-15'
+          example: '2018-07-01'
         quantity:
           type: number
           description: Transaction quantity in inventory units (e.g. pieces). Quantity sign defines the transaction direction as seen by the warehouse, e.g. outgoing sales is sent as negative quantity. All quantities should be given in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit).
-          example: 17
+          example: -2
         transaction_uid:
           type:
           - string
@@ -1779,26 +2639,139 @@ components:
           type:
           - number
           - 'null'
-          description: Value of the whole transaction in the location's currency (e.g. €, £, $). Value should always be positive. Transaction quantity determines the direction of the transaction.
+          description: Value of the whole transaction in the location's currency (e.g.€, £, $). Value should always be positive. Transaction quantity determines the direction of the transaction.
           minimum: 0
-          example: 33.83
+          example: 3.98
         partner_code:
           type:
           - string
           - 'null'
-          description: 'Defines the partner related to the transaction, usually: -Sales transactions: Customer; -Incoming deliveries: Supplier; -Stock transfers: Sending/receiving warehouse'
-          example: SUPPLIER1
+          description: Sending/receiving warehouse code for stock transfers.
+          example: DC1
         reference:
           type:
           - string
           - 'null'
-          description: Sales or purchase order number related to sale or goods receival transaction.
+          description: Purchase order number related to goods receival transaction. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
           example: ORDER_12345
         order_row:
           type:
           - string
           - 'null'
-          description: Sales or purchase order row number related to sale or goods receival transaction.
+          description: Purchase order row number related to goods receival transaction. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
+          example: '1'
+        time:
+          description: Time of the transaction (24h clock hh:mm)
+          $ref: '#/components/schemas/time'
+        order_type:
+          type:
+          - string
+          - 'null'
+          description: Additional transaction type. E.g. delivery channel for deliveries (from supplier, from DC)
+          example: DC
+        purchase_price:
+          type:
+          - number
+          - 'null'
+          description: Purchase cost of the whole sales transaction
+          example: 24
+        expiration_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Expiration date of the goods received.
+          example: '2018-06-01'
+      required:
+      - type
+      - product
+      - location
+      - date
+      - quantity
+      $schema: https://json-schema.org/draft/2020-12/schema
+      additionalProperties: false
+    inbound_meta:
+      type: object
+      properties:
+        timestamp:
+          type: integer
+          description: Timestamp used to order messages. For example UNIX timestamp in UTC. If there are multiple senders timestamps they generate should be synchronized
+          example: 1624437035
+        batch_id:
+          type: string
+          description: A UUID that uniquely identifies this particular request.
+          example: 1692c610-6d26-11eb-9439-0242ac130002
+          format: uuid
+      $schema: https://json-schema.org/draft/2020-12/schema
+      additionalProperties: false
+    retail_batch_balance_request_body:
+      type: object
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        meta:
+          type: object
+          $ref: '#/components/schemas/inbound_meta'
+        data:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/batch_balance'
+    special_delivery:
+      type: object
+      properties:
+        type:
+          type: string
+          minLength: 1
+          description: Type of the transaction. Always SPECIAL_DELIVERY.
+          example: SPECIAL_DELIVERY
+          enum:
+          - SPECIAL_DELIVERY
+        product:
+          type: string
+          minLength: 1
+          description: Product code. Reference to Products.
+          example: PRODUCT1
+        location:
+          type: string
+          minLength: 1
+          description: Location code. Reference to Locations.
+          example: LOCATION1
+        date:
+          type: string
+          minLength: 1
+          format: date
+          description: Transaction posting date.
+          example: '2018-07-14'
+        quantity:
+          type: number
+          description: Transaction quantity in inventory units (e.g. pieces). Quantity sign defines the transaction direction as seen by the warehouse, e.g. outgoing sales is sent as negative quantity. All quantities should be given in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit).
+          example: 1
+        value:
+          type:
+          - number
+          - 'null'
+          description: Value of the whole transaction in the location's currency (e.g.€, £, $). Value should always be positive. Transaction quantity determines the direction of the transaction.
+          minimum: 0
+          example: 1.99
+        partner_code:
+          type:
+          - string
+          - 'null'
+          description: Supplier code for incoming deliveries.
+          example: SUPPLIER1
+        reference:
+          type:
+          - string
+          - 'null'
+          description: Purchase order number related to goods receival transaction. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
+          example: ORDER_12345
+        order_row:
+          type:
+          - string
+          - 'null'
+          description: Purchase order row number related to goods receival transaction. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
           example: '1'
         order_type:
           type:
@@ -1813,6 +2786,7 @@ components:
           type:
           - string
           - 'null'
+          minLength: 1
           format: date
           description: Expiration date of the goods received.
           example: '2018-06-01'
@@ -2253,12 +3227,34 @@ components:
       - location
       $schema: https://json-schema.org/draft/2020-12/schema
       additionalProperties: false
-    time:
-      pattern: ^(2[0-3]|[01]?[0-9]):([0-5]?[0-9])$
-      type:
-      - string
-      - 'null'
-      example: '15:05'
+    retail_daily_sale_request_body:
+      type: object
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        meta:
+          type: object
+          $ref: '#/components/schemas/inbound_meta'
+        data:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/daily_sale'
+    retail_open_purchase_order_request_body:
+      type: object
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        meta:
+          type: object
+          $ref: '#/components/schemas/inbound_meta'
+        data:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/open_purchase_order'
     retail_adjustment_request_body:
       type: object
       required:
@@ -2273,443 +3269,64 @@ components:
           items:
             type: object
             $ref: '#/components/schemas/adjustment'
-    sale:
+    accepted:
       type: object
-      properties:
-        receipt_timestamp:
-          type: string
-          format: date-time
-          description: Closing time of the receipt.
-          example: '2024-05-29T04:12:15.267Z'
-        receipt_code:
-          type: string
-          description: Receipt number for normal sales. In case sales transaction fulfils an open sales order (ecom or B2B), the order number of the sales order
-          example: '6547321564'
-        date:
-          type: string
-          minLength: 1
-          format: date
-          description: Transaction posting date.
-          example: '2018-05-01'
-        time:
-          description: Time of the transaction (24h clock hh:mm)
-          pattern: ^(2[0-3]|[01]?[0-9]):([0-5]?[0-9])$
-          type: string
-          example: '15:05'
-        location:
-          type: string
-          description: Location code. Reference to Locations.
-          example: LOCATION1
-          minLength: 1
-        product:
-          type: string
-          description: Product code. Reference to Products.
-          example: PRODUCT1
-          minLength: 1
-        quantity:
-          type: number
-          description: Transaction quantity in inventory units (e.g. pieces). Quantity sign defines the transaction direction as seen by the warehouse, e.g. outgoing sales is sent as negative quantity. All quantities should be given in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit).
-          example: -1
-        receipt_row_number:
-          type: integer
-          minimum: 0
-          description: Uniquely identifies the row together with the receipt code. Must be non-negative.
-          example: 1234
-        value:
-          type:
-          - number
-          - 'null'
-          description: Value of the whole transaction in the location's currency (e.g.£, €, $). Value should always be positive. Transaction quantity determines the direction of the transaction.
-          minimum: 0
-          example: 7.99
-        sales_value_with_tax:
-          type:
-          - number
-          - 'null'
-          minimum: 0
-          description: Value of the whole transaction including sales taxes (VAT) in the location's currency (e.g.€, £, $). Value should always be non-negative. (Transaction quantity determines the direction of the transaction.)
-          example: 17
-        tax_amount:
-          type:
-          - number
-          - 'null'
-          description: The amount of the tax. Used for tax calulcations in Pricing & Promotions, not needed for F&R.
-          example: 2
-        sales_tax_rate:
-          type:
-          - number
-          - 'null'
-          description: Rate of the sales tax, VAT, GST or similar sales-related tax. Used for tax calulcations in Pricing & Promotions, not needed for F&R.
-          example: 0.12
-        purchase_price:
-          type:
-          - number
-          - 'null'
-          description: Purchase cost of sales transaction - this allows sales margin calculation.
-          example: 1.99
-        loyalty_customer_type:
-          type:
-          - string
-          - 'null'
-          description: 'Consumer''s loyalty level, if any. Can have values such as: "No", "Basic", "Gold", "Platinum" but these are not tighly restricted'
-          example: Platinum
-        fulfillment_type:
-          type:
-          - string
-          - 'null'
-          description: The method in which the sale was fulfilled.
-          example: Home delivery
-        delivery_zip_code:
-          type:
-          - string
-          - 'null'
-          description: ZIP (postal) code of the region to which a delivery is made.
-          example: '12345'
-        loyalty_customer_zip_code:
-          type:
-          - string
-          - 'null'
-          description: ZIP (postal) code of the address of a loyalty customer.
-          example: '12345'
-        campaign_code:
-          type:
-          - string
-          - 'null'
-          description: In case sales row includes a campaign discount, code of the related campaign. Can include multiple campaign codes separated by comma (,).
-          example: May_discount
-        transaction_campaign_code:
-          type:
-          - string
-          - 'null'
-          description: Transaction campaign code used for Promotion Planning. In case sales row includes a campaign discount, code of the related campaign. Can include multiple campaign codes separated by comma (,).
-          example: May_discount
-        original_sales_value:
-          type:
-          - number
-          - 'null'
-          description: The list price of the sales row without campaign or other discounts excluding sales tax
-          example: 17
-        original_sales_value_with_tax:
-          type:
-          - number
-          - 'null'
-          description: The list price of the sales row without campaign or other discounts including  sales tax
-          example: 20
-        promotion_discount:
-          type:
-          - number
-          - 'null'
-          description: Promotion/campaign discount %.
-          example: 0.21
-        transaction_promotion_discount:
-          type:
-          - number
-          - 'null'
-          description: Campaign discount used for Promotion Planning
-          example: 0.21
-        discount:
-          type:
-          - number
-          - 'null'
-          description: Non-promotional row discount (%), e.g. markdown or given by sales rep. The reason for the discount can be elaborated in the "Discount reason" field..
-          example: 0.12
-        discount_reason:
-          type:
-          - string
-          - 'null'
-          description: Reason for row discount
-          example: Markdown
-        checkout_code:
-          type:
-          - string
-          - 'null'
-          description: Identifier of the checkout where the sale took place. For example cash or cashier number
-          example: '1'
-        checkout_type:
-          type:
-          - string
-          - 'null'
-          description: Checkout type, e.g. self-service checkout vs cashier staffed checkout vs service desk
-          example: Self-service
-        partner_code:
-          type:
-          - string
-          - 'null'
-          description: 'B2B trading partner to whom goods are sold NOTE: Trading partner must not be individual consumer (i.e. loyalty code), as interface must not contain personal data that may fall under any privacy regulation'
-          example: C01234
-        order_type:
-          type:
-          - string
-          - 'null'
-          description: Additional subtype for sales transactions that can be used to distinct normal sales from special sales and deliveries (e.g. if project sales need to be reported separately from normal sales).
-          example: SPECIAL_SALE
-          enum:
-          - MARKDOWN_SALE
-          - SPECIAL_SALE
-          - UNUSUAL_SALE
-          - null
-        row_timestamp:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: Scanning time of an individual product.
-          example: '2024-05-29T04:12:15.267Z'
-      required:
-      - date
-      - product
-      - location
-      - time
-      - quantity
-      - receipt_code
-      - receipt_row_number
-      - receipt_timestamp
-      $schema: https://json-schema.org/draft/2020-12/schema
-      additionalProperties: false
-    balance:
-      type: object
-      properties:
-        type:
-          type: string
-          minLength: 1
-          description: 'Supported balance types are: BALANCE = Current physical stock level'
-          example: BALANCE
-          enum:
-          - BALANCE
-        product:
-          type: string
-          minLength: 1
-          description: Product code (code for finished product or stock keeping unit). Reference to Products.
-          example: PRODUCT1
-        location:
-          type: string
-          minLength: 1
-          description: Inventory location code (i.e. code for affected store, warehouse, etc.). Reference to Locations.
-          example: LOCATION1
-        date:
-          type: string
-          minLength: 1
-          format: date
-          description: Balance date i.e. date of the product-location balance. Previous day's date in the daily transfer. For historical balances the date of the balance.
-          example: '2018-09-30'
-        balance:
-          type: number
-          description: Physical balance quantity in the location in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit). Balance quantity should be always positive and possible reservations are send as open sales orders.
-          example: 15
-        value:
-          type:
-          - number
-          - 'null'
-          description: Value of the whole transaction in the location's currency (e.g. €, £, $). Value should always be positive as transaction quantity determines the direction of the transaction. Usually based on purchase price. Negative values are automatically converted to the positive absolute value of the inserted value.
-          minimum: 0
-          example: 29.85
-        time:
-          description: If balances are sent multiple times during the day, indicates the time of the balance information, i.e. when it was fetched from source system
-          $ref: '#/components/schemas/time'
-      required:
-      - type
-      - product
-      - location
-      - date
-      - balance
-      $schema: https://json-schema.org/draft/2020-12/schema
-      additionalProperties: false
-    outbound_list_endpoint:
-      $schema: http://json-schema.org/draft-04/schema#
-      type: object
-      properties:
-        meta:
-          type: object
-          properties:
-            type:
-              type: string
-              description: Type of the export
-              example: data.namespace.custom_export_resource.available
-            requested_at:
-              type: string
-              description: A timestamp of the moment the request was served
-              example: '2024-06-12T07:03:41+00:00'
-          required: []
-        data:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-                description: File identifier
-                example: 43ee6e0c-6341-418f-a4e9-4029ec86f16a
-              timestamp:
-                type: string
-                description: The time when the file was exported
-                example: '2024-05-29T04:12:16.102371Z'
-              downloaded:
-                type: string
-                description: Has the file been tried to download before. Set to 'false' upon file creation. A successful start of a download sets this to 'true'.
-                example: 'false'
-              url:
-                type: string
-                description: URL-path of the file. Use this when downloading.
-                example: /data/namespace/custom_export_resource/43ee6e0c-6341-418f-a4e9-4029ec86f16a
-              resource:
-                type: string
-                description: Resource name
-                example: custom_export_resource
-            required: []
-      required: []
-    spoilage:
-      type: object
-      properties:
-        type:
-          type: string
-          minLength: 1
-          description: Type of the transaction. Always SPOILAGE.
-          example: SPOILAGE
-          enum:
-          - SPOILAGE
-        product:
-          type: string
-          minLength: 1
-          description: Product code. Reference to Products.
-          example: PRODUCT1
-        location:
-          type: string
-          minLength: 1
-          description: Location code. Reference to Locations.
-          example: LOCATION1
-        date:
-          type: string
-          minLength: 1
-          format: date
-          description: Transaction posting date.
-          example: '2018-09-01'
-        quantity:
-          type: number
-          description: Transaction quantity in inventory units (e.g. pieces). Quantity sign defines the transaction direction as seen by the warehouse, e.g. outgoing sales is sent as negative quantity. All quantities should be given in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit).
-          example: -1
-        transaction_uid:
-          type:
-          - string
-          - 'null'
-          description: Transaction UID. Unique identifier for transaction row. Can be used as key for updates to the row.
-          example: TID12345
-        value:
-          type:
-          - number
-          - 'null'
-          description: Value of the whole transaction in the location's currency (e.g.€, £, $). Value should always be positive. Transaction quantity determines the direction of the transaction.
-          minimum: 0
-          example: 1.99
-        time:
-          description: Time of the transaction (24h clock hh:mm)
-          $ref: '#/components/schemas/time'
-        expiration_date:
-          type:
-          - string
-          - 'null'
-          format: date
-          description: Expiration date of the goods received.
-          example: '2018-06-01'
-      required:
-      - type
-      - product
-      - location
-      - date
-      - quantity
-      $schema: https://json-schema.org/draft/2020-12/schema
-      additionalProperties: false
-    retail_footfall_count_request_body:
-      type: object
-      required:
-      - data
-      additionalProperties: false
-      properties:
-        meta:
-          type: object
-          $ref: '#/components/schemas/inbound_meta'
-        data:
-          type: array
-          items:
-            type: object
-            $ref: '#/components/schemas/footfall_count'
-    retail_spoilage_request_body:
-      type: object
-      required:
-      - data
-      additionalProperties: false
-      properties:
-        meta:
-          type: object
-          $ref: '#/components/schemas/inbound_meta'
-        data:
-          type: array
-          items:
-            type: object
-            $ref: '#/components/schemas/spoilage'
-    retail_workload_driver_forecasts_day:
-      $schema: https://json-schema.org/draft/2020-12/schema
-      $id: /schema/generic_export/workload_driver_forecasts_day/1.json
-      type: object
-      additionalProperties: false
       required:
       - meta
       - data
       properties:
         meta:
           type: object
-          additionalProperties: false
-          required:
-          - exported_at
-          - configured_at
-          - primary_resource
-          - schema
-          default: {}
-          title: Response metadata
           properties:
-            exported_at:
+            code:
+              type: integer
+              description: HTTP status code for the response. Is always in 2xx range for accepted messages
+              example: 200
+            message:
               type: string
-              format: date-time
-              title: Exported At
-              description: The time the content was exported
-            configured_at:
+              description: HTTP status message for the response.
+              example: OK
+            request_id:
               type: string
-              format: date-time
-              title: Configured At
-              description: The time the response was configured at the host system. This can be used to detect updates for the schema.
-            primary_resource:
-              type: string
-              title: Primary Resource
-              description: The primary resource for the data
-            schema:
-              type: string
-              title: Schema Path
-              description: The schema path for the data
+              description: A UUID that uniquely identifies this particular response for later processing metadata retrieval.
+              example: 1692c610-6d26-11eb-9439-0242ac130002
+              format: uuid
+          $schema: https://json-schema.org/draft/2020-12/schema
+          additionalProperties: false
+        data:
+          type: object
+          properties: {}
+          additionalProperties: false
+    retail_end_customer_transaction_request_body:
+      type: object
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        meta:
+          type: object
+          $ref: '#/components/schemas/inbound_meta'
         data:
           type: array
-          additionalProperties: false
-          required: []
-          title: Data Records
           items:
             type: object
-            additionalProperties: false
-            properties:
-              workload_driver_type_code:
-                type: string
-                title: Workload driver type code
-                description: Identifier of the type of the workload driver
-              location_code:
-                type: string
-                title: Location code
-                description: Identifier for location
-              effective_quantity:
-                type: number
-                title: Effective forecast quantity
-                description: Effective forecast quantity
-              date:
-                type: string
-                format: date
-                title: Date
-                description: Defines the date of the effective forecast
+            $ref: '#/components/schemas/end_customer_transaction'
+    retail_goods_received_request_body:
+      type: object
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        meta:
+          type: object
+          $ref: '#/components/schemas/inbound_meta'
+        data:
+          type: array
+          items:
+            type: array
+            items:
+              type: object
+              $ref: '#/components/schemas/goods_received'
     open_sales_order:
       type: object
       properties:
@@ -2801,7 +3418,7 @@ components:
       - estimated_date
       $schema: https://json-schema.org/draft/2020-12/schema
       additionalProperties: false
-    retail_end_customer_transaction_request_body:
+    retail_sale_request_body:
       type: object
       required:
       - data
@@ -2814,207 +3431,105 @@ components:
           type: array
           items:
             type: object
-            $ref: '#/components/schemas/end_customer_transaction'
-    special_delivery:
+            $ref: '#/components/schemas/sale'
+    retail_order_request_body:
       type: object
-      properties:
-        type:
-          type: string
-          minLength: 1
-          description: Type of the transaction. Always SPECIAL_DELIVERY.
-          example: SPECIAL_DELIVERY
-          enum:
-          - SPECIAL_DELIVERY
-        product:
-          type: string
-          minLength: 1
-          description: Product code. Reference to Products.
-          example: PRODUCT1
-        location:
-          type: string
-          minLength: 1
-          description: Location code. Reference to Locations.
-          example: LOCATION1
-        date:
-          type: string
-          minLength: 1
-          format: date
-          description: Transaction posting date.
-          example: '2018-07-14'
-        quantity:
-          type: number
-          description: Transaction quantity in inventory units (e.g. pieces). Quantity sign defines the transaction direction as seen by the warehouse, e.g. outgoing sales is sent as negative quantity. All quantities should be given in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit).
-          example: 1
-        value:
-          type:
-          - number
-          - 'null'
-          description: Value of the whole transaction in the location's currency (e.g.€, £, $). Value should always be positive. Transaction quantity determines the direction of the transaction.
-          minimum: 0
-          example: 1.99
-        partner_code:
-          type:
-          - string
-          - 'null'
-          description: Supplier code for incoming deliveries.
-          example: SUPPLIER1
-        reference:
-          type:
-          - string
-          - 'null'
-          description: Purchase order number related to goods receival transaction. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
-          example: ORDER_12345
-        order_row:
-          type:
-          - string
-          - 'null'
-          description: Purchase order row number related to goods receival transaction. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
-          example: '1'
-        order_type:
-          type:
-          - string
-          - 'null'
-          description: Additional transaction type. E.g. delivery channel for deliveries (from supplier, from DC)
-          example: DC
-        time:
-          description: Time of the transaction (24h clock hh:mm)
-          $ref: '#/components/schemas/time'
-        expiration_date:
-          type:
-          - string
-          - 'null'
-          minLength: 1
-          format: date
-          description: Expiration date of the goods received.
-          example: '2018-06-01'
       required:
-      - type
-      - product
-      - location
-      - date
-      - quantity
-      $schema: https://json-schema.org/draft/2020-12/schema
+      - data
       additionalProperties: false
-    footfall_count:
+      properties:
+        meta:
+          type: object
+          $ref: '#/components/schemas/inbound_meta'
+        data:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/order'
+    retail_workload_driver_forecasts_quarter:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      $id: /schema/generic_export/workload_driver_forecasts_quarter/1.json
       type: object
-      properties:
-        date:
-          type: string
-          minLength: 1
-          format: date
-          description: Date of the footfall observation.
-          example: '2018-01-01'
-        location:
-          type: string
-          minLength: 1
-          description: Location where the footfall observation is done
-          example: LOCATION1
-        quantity:
-          type: number
-          description: The footfall count in a location at specificed date and time bucket.
-          example: 50
-        time:
-          description: 'Time of the footfall observation.  Footfall count is aggregated to time buckets, recommended bucket size is 15 minutes. For example: If time bucket size is 15 minutes, then row with time 11:00 include aggregated footfall 11:00:00-11:14:59'
-          pattern: ^(2[0-3]|[01]?[0-9]):([0-5]?[0-9])$
-          type: string
-          example: '15:05'
-      required:
-      - date
-      - location
-      - time
-      - quantity
-      $schema: https://json-schema.org/draft/2020-12/schema
       additionalProperties: false
-    lost_sale:
+      required:
+      - meta
+      - data
+      properties:
+        meta:
+          type: object
+          additionalProperties: false
+          required:
+          - exported_at
+          - configured_at
+          - primary_resource
+          - schema
+          default: {}
+          title: Response metadata
+          properties:
+            exported_at:
+              type: string
+              format: date-time
+              title: Exported At
+              description: The time the content was exported
+            configured_at:
+              type: string
+              format: date-time
+              title: Configured At
+              description: The time the response was configured at the host system. This can be used to detect updates for the schema.
+            primary_resource:
+              type: string
+              title: Primary Resource
+              description: The primary resource for the data
+            schema:
+              type: string
+              title: Schema Path
+              description: The schema path for the data
+        data:
+          type: array
+          additionalProperties: false
+          required: []
+          title: Data Records
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              workload_driver_type_code:
+                type: string
+                title: Workload driver type code
+                description: Identifier of the type of the workload driver
+              location_code:
+                type: string
+                title: Location code
+                description: Identifier for location
+              effective_quantity:
+                type: number
+                title: Effective forecast quantity
+                description: Effective forecast quantity
+              date:
+                type: string
+                format: date
+                title: Date
+                description: Defines the date of the effective forecast
+              time:
+                type: string
+                format: time
+                title: Time
+                example: '14:15'
+                description: Defines the quarter of an hour of the effective forecast (hh:mm)
+    retail_open_sales_order_request_body:
       type: object
-      properties:
-        type:
-          type: string
-          minLength: 1
-          description: Type of the transaction. Always LOST_SALE.
-          example: LOST_SALE
-          enum:
-          - LOST_SALE
-        product:
-          type: string
-          minLength: 1
-          description: Product code. Reference to Products.
-          example: PRODUCT1
-        location:
-          type: string
-          description: Location code. Reference to Locations.
-          example: LOCATION1
-        date:
-          type: string
-          minLength: 1
-          format: date
-          description: Transaction posting date.
-          example: '2018-09-05'
-        quantity:
-          type: number
-          description: Transaction quantity in inventory units (e.g. pieces). Quantity sign defines the transaction direction as seen by the warehouse, e.g. outgoing sales is sent as negative quantity. All quantities should be given in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit).
-          example: 5
-        transaction_uid:
-          type:
-          - string
-          - 'null'
-          description: Transaction UID. Unique identifier for transaction row. Can be used as key for updates to the row.
-          example: TID12345
-        value:
-          type:
-          - number
-          - 'null'
-          description: Value of the whole transaction in the location's currency (e.g. €, £, $). Value should always be positive. Transaction quantity determines the direction of the transaction.
-          minimum: 0
-          example: 44.95
-        purchase_price:
-          type:
-          - number
-          - 'null'
-          description: Purchase cost of sales transaction - this allows sales margin calculation.
-          example: 9.95
-        partner_code:
-          type:
-          - string
-          - 'null'
-          description: Supplier code for incoming deliveries.
-          example: SUPPLIER1
-        reference:
-          type:
-          - string
-          - 'null'
-          description: Purchase order number related to goods receival transaction. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
-          example: ORDER_12345
-        order_row:
-          type:
-          - string
-          - 'null'
-          description: Purchase order row number related to goods receival transaction. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
-          example: '1'
-        order_type:
-          type:
-          - string
-          - 'null'
-          description: Additional transaction type. E.g. delivery channel for deliveries (from supplier, from DC)
-          example: DC
-        time:
-          description: Time of the transaction (24h clock hh:mm)
-          $ref: '#/components/schemas/time'
-        expiration_date:
-          type:
-          - string
-          - 'null'
-          format: date
-          description: Expiration date of the goods received.
-          example: '2018-06-01'
       required:
-      - type
-      - product
-      - location
-      - date
-      - quantity
-      $schema: https://json-schema.org/draft/2020-12/schema
+      - data
       additionalProperties: false
+      properties:
+        meta:
+          type: object
+          $ref: '#/components/schemas/inbound_meta'
+        data:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/open_sales_order'
     adjustment:
       type: object
       properties:
@@ -3100,21 +3615,7 @@ components:
       - quantity
       $schema: https://json-schema.org/draft/2020-12/schema
       additionalProperties: false
-    retail_special_delivery_request_body:
-      type: object
-      required:
-      - data
-      additionalProperties: false
-      properties:
-        meta:
-          type: object
-          $ref: '#/components/schemas/inbound_meta'
-        data:
-          type: array
-          items:
-            type: object
-            $ref: '#/components/schemas/special_delivery'
-    dc_transaction:
+    goods_received:
       type: object
       properties:
         product:
@@ -3127,751 +3628,244 @@ components:
           minLength: 1
           description: Location code. Reference to Locations.
           example: LOCATION1
-        date:
-          type: string
-          minLength: 1
-          format: date
-          description: Transaction posting date.
-          example: '2018-07-01'
-        sales_orders_quantity:
-          type: number
-          description: 'Only for type: OPEN_SALES_ORDER. Open order quantity in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit). Quantity sign defines the transaction direction as seen by the warehouse, so open sales order is sent as negative quantity.'
-          exclusiveMaximum: 0
-          example: -2
-        sales_orders_value:
-          type:
-          - number
-          - 'null'
-          description: 'Only for type: OPEN_SALES_ORDER. Value of the whole transaction in the location''s currency (e.g. €, £, $). Value should always be positive as transaction quantity determines the direction of the transaction. Value suggestion: Sales value excluding tax. If the sales order is internal sale, the value should be the internal sales value used for the transaction'
-          minimum: 0
-          example: 3.98
-        balance:
-          type:
-          - number
-          - 'null'
-          description: 'Only for type: BALANCE or BATCH_BALANCE. Physical balance quantity in the location in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit). Balance quantity should be always positive and possible reservations are send as open sales orders.'
-          minimum: 0
-          example: 50
-        estimated_date:
-          type: string
-          minLength: 1
-          format: date
-          description: 'For type SALES_ORDER: Requested/confirmed outbound delivery date. The date must reflect the time when the stock must be available for fulfilling an order. It does not reflect the actual date when the goods are delivered to the customer. For type BATCH_BALANCE: Last valid date ("Best before date") for the batch. Batch balance is expected to become non-sellable at the end of this date.'
-          example: '2018-07-01'
-        type:
-          type: string
-          minLength: 1
-          description: Type of the transaction. Must be one of BALANCE, BATCH_BALANCE or SALES_ORDER (=open sales order).
-          example: BALANCE
-          enum:
-          - BALANCE
-          - BATCH_BALANCE
-          - SALES_ORDER
-        time:
-          description: If balances are sent multiple times during the day, indicates the time (24h clock hh:mm) of the balance or batch balance information, i.e. when it was fetched from source system
-          $ref: '#/components/schemas/time'
-      required:
-      - product
-      - location
-      - date
-      - sales_orders_quantity
-      - estimated_date
-      - type
-      $schema: https://json-schema.org/draft/2020-12/schema
-      additionalProperties: false
-    retail_sales_forecasts:
-      $schema: https://json-schema.org/draft/2020-12/schema
-      $id: /schema/generic_export/sales_forecasts/1.json
-      type: object
-      additionalProperties: false
-      required:
-      - meta
-      - data
-      properties:
-        meta:
-          type: object
-          additionalProperties: false
-          required:
-          - exported_at
-          - configured_at
-          - primary_resource
-          - schema
-          default: {}
-          title: Response metadata
-          properties:
-            exported_at:
-              type: string
-              format: date-time
-              title: Exported At
-              description: The time the content was exported
-              example: '2024-05-29T04:12:15.267Z'
-            configured_at:
-              type: string
-              format: date-time
-              title: Configured At
-              description: The time the response was configured at the host system. This can be used to detect updates for the schema.
-              example: '2023-11-21T08:16:54.908Z'
-            primary_resource:
-              type: string
-              title: Primary Resource
-              description: The primary resource for the data
-              example: sales_forecasts
-            schema:
-              type: string
-              title: Schema Path
-              description: The schema path for the data
-              example: /schema/generic_export/sales-forecasts/1.json
-        data:
+        balances:
           type: array
-          additionalProperties: false
-          required: []
-          title: Data Records
           items:
             type: object
-            additionalProperties: false
+            required:
+            - type
+            - date
+            - balance
             properties:
-              product_code:
+              type:
                 type: string
-                title: Product code
-                description: Product code in ERP system
-                example: abc_7593485671
-              product_name:
-                type: string
-                title: Product name
-                description: Product name
-                example: name abc
-              location_code:
-                type: string
-                title: Location code
-                description: Location code
-                example: abc_5673485990
-              supplier_code:
-                type: string
-                title: Supplier code
-                description: Supplier code
-                example: DC1
-              date:
-                type: string
-                format: date
-                title: Date
-                description: Date of the sales forecast
-                example: '2024-05-29'
-              effective_quantity:
-                type: number
-                title: Effective forecast quantity
-                description: Sum of baseline quantity, campaign addition, additional quantity and external addition. Corrected quantities are used for baseline forecast, campaign addition and external addition, if set. If corrected effective quantity is set, it will override the calculated value.
-                example: '1.23'
-              comment:
-                type: string
-                title: Comment
-                description: Optional comment for the sales forecast.
-                example: comment
-    retail_daily_sale_request_body:
-      type: object
-      required:
-      - data
-      additionalProperties: false
-      properties:
-        meta:
-          type: object
-          $ref: '#/components/schemas/inbound_meta'
-        data:
-          type: array
-          items:
-            type: object
-            $ref: '#/components/schemas/daily_sale'
-    retail_balance_request_body:
-      type: object
-      required:
-      - data
-      additionalProperties: false
-      properties:
-        meta:
-          type: object
-          $ref: '#/components/schemas/inbound_meta'
-        data:
-          type: array
-          items:
-            type: object
-            $ref: '#/components/schemas/balance'
-    retail_batch_balance_request_body:
-      type: object
-      required:
-      - data
-      additionalProperties: false
-      properties:
-        meta:
-          type: object
-          $ref: '#/components/schemas/inbound_meta'
-        data:
-          type: array
-          items:
-            type: object
-            $ref: '#/components/schemas/batch_balance'
-    end_customer_transaction:
-      type: object
-      properties:
-        date:
-          type: string
-          minLength: 1
-          format: date
-          description: Date of the end customer transaction. In sales, reflects the change of ownership.
-          example: '2024-09-23'
-        product:
-          type: string
-          minLength: 1
-          description: Item code of finished productor stock keeping unit.
-          example: '80903'
-        end_customer:
-          type: string
-          minLength: 1
-          description: Inventory end customer code.
-          example: '5500'
-        type:
-          type: string
-          minLength: 1
-          description: Type of the transaction (SALE).
-          example: SALE
-          enum:
-          - SALE
-          - SALE_OUT
-        sales_quantity:
-          type:
-          - number
-          - 'null'
-          description: Sales quantity in base unit of measure (e.g. peices). Quantity sign defines the transaction direction as seen by the location, e.g. outgoing sales is sent as negative quantity. Transaction quantity determines the direction of the transaction.
-          example: 1.99
-        transaction_uid:
-          type:
-          - string
-          - 'null'
-          description: Transaction UID. Unique identifier for transaction row. Can be used as key for updates to the row.
-          example: TID12345
-        picking_date:
-          type:
-          - string
-          - 'null'
-          minLength: 1
-          format: date
-          description: 'Date when delivery for the sales order (type: SALE) was picked from source location.'
-          example: '2025-03-03'
-        time:
-          description: Time of the transaction (24h clock hh:mm)
-          $ref: '#/components/schemas/time'
-        source_location:
-          type:
-          - string
-          - 'null'
-          description: For SALE, the warehouse location from where the goods were delivered to end customer. For SALE_OUT not relevant.
-          example: DC123
-        sales_value:
-          type:
-          - number
-          - 'null'
-          description: Value as of revenue of the whole transaction, in currency defined in currency field, excluding sales taxes (e.g. VAT). Always positive - transaction quantity sign determines the direction of the transaction.
-          example: 230
-        currency:
-          type:
-          - string
-          - 'null'
-          description: Currency of the sales value.
-          example: USD
-        reference:
-          type:
-          - string
-          - 'null'
-          description: Customer (sales) order number related to sale.
-          example: S1234567
-        order_row:
-          type:
-          - string
-          - 'null'
-          description: Customer (sales) order row number related to sale.
-          example: '10'
-        batch_code:
-          type:
-          - string
-          - 'null'
-          description: Batch code. Unique identifier for the sold batch.
-          example: B1234
-        cost_of_goods_sold:
-          type:
-          - number
-          - 'null'
-          description: Cost of goods sold. The standard cost or purchase price of the sales transaction row.
-          example: 200
-      required:
-      - date
-      - product
-      - end_customer
-      - type
-      - sales_quantity
-      $schema: https://json-schema.org/draft/2020-12/schema
-      additionalProperties: false
-    retail_transfer_request_body:
-      type: object
-      required:
-      - data
-      additionalProperties: false
-      properties:
-        meta:
-          type: object
-          $ref: '#/components/schemas/inbound_meta'
-        data:
-          type: array
-          items:
-            type: object
-            $ref: '#/components/schemas/transfer'
-    retail_dc_transaction_request_body:
-      type: object
-      required:
-      - data
-      additionalProperties: false
-      properties:
-        meta:
-          type: object
-          $ref: '#/components/schemas/inbound_meta'
-        data:
-          type: array
-          items:
-            type: object
-            $ref: '#/components/schemas/dc_transaction'
-    inbound_meta:
-      type: object
-      properties:
-        timestamp:
-          type: integer
-          description: Timestamp used to order messages. For example UNIX timestamp in UTC. If there are multiple senders timestamps they generate should be synchronized
-          example: 1624437035
-        batch_id:
-          type: string
-          description: A UUID that uniquely identifies this particular request.
-          example: 1692c610-6d26-11eb-9439-0242ac130002
-          format: uuid
-      $schema: https://json-schema.org/draft/2020-12/schema
-      additionalProperties: false
-    accepted:
-      type: object
-      required:
-      - meta
-      - data
-      properties:
-        meta:
-          type: object
-          properties:
-            code:
-              type: integer
-              description: HTTP status code for the response. Is always in 2xx range for accepted messages
-              example: 200
-            message:
-              type: string
-              description: HTTP status message for the response.
-              example: OK
-            request_id:
-              type: string
-              description: A UUID that uniquely identifies this particular response for later processing metadata retrieval.
-              example: 1692c610-6d26-11eb-9439-0242ac130002
-              format: uuid
-          $schema: https://json-schema.org/draft/2020-12/schema
-          additionalProperties: false
-        data:
-          type: object
-          properties: {}
-          additionalProperties: false
-    retail_order_proposals:
-      $schema: https://json-schema.org/draft/2020-12/schema
-      $id: /schema/generic_export/proposal-sample/1.json
-      type: object
-      additionalProperties: false
-      required:
-      - meta
-      - data
-      properties:
-        meta:
-          type: object
-          additionalProperties: false
-          required:
-          - exported_at
-          - configured_at
-          - primary_resource
-          - schema
-          default: {}
-          title: Response metadata
-          properties:
-            exported_at:
-              type: string
-              format: date-time
-              title: Exported At
-              description: The time the content was exported
-              example: '2024-05-29T04:12:15.267Z'
-            configured_at:
-              type: string
-              format: date-time
-              title: Configured At
-              description: The time the response was configured at the host system. This can be used to detect updates for the schema.
-              example: '2023-11-21T08:16:54.908Z'
-            primary_resource:
-              type: string
-              title: Primary Resource
-              description: The primary resource for the data
-              example: order_proposals
-            schema:
-              type: string
-              title: Schema Path
-              description: The schema path for the data
-              example: /schema/generic_export/order_proposals/1.json
-        data:
-          type: array
-          additionalProperties: false
-          required: []
-          title: Data Records
-          items:
-            type: object
-            additionalProperties: false
-            properties:
-              order_number:
-                type: integer
-                title: Order number
-                description: Row level unique order number. Can be used to identify the order.
-                example: 90100
-              send_run_id:
-                type: integer
-                title: Send run id
-                description: Run id (number) of the job from which the order proposal row was sent out from RELEX. Can be used for troubleshooting and identifying when a specific order was sent.
-                example: 1213
-              product_code:
-                type: string
-                title: Product code
-                description: Product code. Identifier of the product.
-                example: abc_5648489057
-              location_code:
-                type: string
-                title: Location code
-                description: Location code. Identifier of the location/warehouse.
-                example: abc_3712470314
-              supplier_code:
-                type: string
-                title: Supplier code
-                description: Supplier of the order proposal.
-                example: abc_2648891291
-              effective_quantity:
-                type: number
-                title: Effective quantity
-                description: Amount of products to be ordered in base unit of measure.
-                example: 125
-              date:
-                type: string
-                format: date
-                title: Date
-                description: Order date, i.e. the date on which the purchase order is created. Current date for normal order proposals, future date for reserve order proposals.
-                example: '2024-05-29'
-              delivery_date:
-                type: string
-                format: date
-                title: Delivery date
-                description: Requested delivery date for goods receival to location/warehouse.
-                example: '2024-05-29'
-              second_delivery_date:
-                type: string
-                format: date
-                title: Delivery date
-                description: Next possible delivery date after the delivery date of current order proposal row for the product-location.
-                example: '2024-06-29'
-              order_type:
-                type: string
-                title: Type
-                description: 'Defines the type of the order proposal: NORMAL => Normal, SECONDARY => Secondary (i.e. not main delivery date order), EXTRA => Extra order, INITIAL_REPLENISHMENT => Campaign Initial replenishment, ALLOCATION => Allocation, FUTURE_ALLOCATION => Future allocation, FORCEOUT_ALLOCATION => Allocation: Force-out, FORCEOUT_FUTURE_ALLOCATION => Future allocation: Force-out, FILL => Fill, IN_ADVANCE => Order in advance, FUTURE => Reserve order proposal, FUTURE_SECONDARY => Reserve order proposal, secondary order, FUTURE_INITIAL_REPLENISHMENT => Reserve order proposal, campaign initial replenishment, FUTURE_FILL => Reserve order proposal, fill, DAILY => Daily order, DAILY_FILL => Daily fill order, DAILY_SECONDARY => Daily secondary order,PRE_PACK_STARTUP => Prepack startup allocation, PRE_PACK_REPLENISHMENT => Prepack replenishment allocation, PRE_ORDER => Pre-order, EXTERNAL => External order, OTG_MANUAL => Manual order created in RELEX On-the-go Replenishment'
-                example: NORMAL
+                minLength: 1
+                description: Type of the transaction. Always BALANCE.
+                example: BALANCE
                 enum:
-                - ALLOCATION
-                - DAILY
-                - DAILY_FILL
-                - DAILY_SECONDARY
-                - EXTERNAL
-                - EXTRA
-                - FILL
-                - FORCEOUT_ALLOCATION
-                - FORCEOUT_FUTURE_ALLOCATION
-                - FUTURE
-                - FUTURE_ALLOCATION
-                - FUTURE_FILL
-                - FUTURE_INITIAL_REPLENISHMENT
-                - FUTURE_SECONDARY
-                - INITIAL_REPLENISHMENT
-                - IN_ADVANCE
-                - NORMAL
-                - OTG_MANUAL
-                - PRE_ORDER
-                - PRE_PACK_REPLENISHMENT
-                - PRE_PACK_STARTUP
-                - SECONDARY
-              comment_1:
+                - BALANCE
+              date:
                 type: string
-                title: Comment 1
-                description: Free comment text 1. Information only, not used in calculations.
-                example: comment 1
-              comment_2:
-                type: string
-                title: Comment 2
-                description: Free comment text 2. Information only, not used in calculations.
-                example: comment 2
-    retail_open_purchase_order_request_body:
-      type: object
-      required:
-      - data
-      additionalProperties: false
-      properties:
-        meta:
-          type: object
-          $ref: '#/components/schemas/inbound_meta'
-        data:
+                minLength: 1
+                format: date
+                description: The date of the recorded balance quantity. Usually previous day's date except if reading in historical balances.
+                example: '2018-09-30'
+              balance:
+                type: number
+                description: Physical balance quantity in the location in base unit of measure (e.g. pieces). RELEX calculates unreserved balance based on physical balance and open orders. Balance quantity should be always positive and possible reservations can be send as open sales orders. All quantities should be given in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit).
+                example: 15
+              value:
+                type:
+                - number
+                - 'null'
+                description: Book value of total quantity of the balance entry. Alternatively if book value is not available, the purchase value of the balance quantity can be used.
+                minimum: 0
+                example: 29.85
+              time:
+                description: Time of the transaction (24h clock hh:mm)
+                pattern: ^(2[0-3]|[01]?[0-9]):([0-5]?[0-9])$
+                type:
+                - string
+                - 'null'
+                example: '15:05'
+            $schema: https://json-schema.org/draft/2020-12/schema
+            additionalProperties: false
+        deliveries:
           type: array
           items:
             type: object
-            $ref: '#/components/schemas/open_purchase_order'
-    retail_inventory_event_request_body:
-      type: object
-      required:
-      - data
-      additionalProperties: false
-      properties:
-        meta:
-          type: object
-          $ref: '#/components/schemas/inbound_meta'
-        data:
+            required:
+            - type
+            - date
+            - quantity
+            properties:
+              type:
+                type: string
+                minLength: 1
+                description: Type of the transaction. Always DELIVERY or SPECIAL_DELIVERY.
+                example: DELIVERY
+                enum:
+                - DELIVERY
+                - SPECIAL_DELIVERY
+              date:
+                type: string
+                minLength: 1
+                format: date
+                description: Transaction posting date.
+                example: '2018-06-01'
+              quantity:
+                type: number
+                description: Transaction quantity in inventory units (e.g. pieces). Quantity sign defines the transaction direction as seen by the warehouse, e.g. outgoing sales is sent as negative quantity. All quantities should be given in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit).
+                example: 6
+              transaction_uid:
+                type:
+                - string
+                - 'null'
+                description: Transaction UID. Unique identifier for transaction row. Can be used as key for updates to the row.
+                example: TID12345
+              value:
+                type:
+                - number
+                - 'null'
+                description: Value of the whole transaction in the location's currency (e.g. €, £, $). Value should always be positive. (Transaction quantity determines the direction of the transaction.)
+                minimum: 0
+                example: 47.76
+              reference:
+                type:
+                - string
+                - 'null'
+                description: Purchase order number related to goods receival transaction. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
+                example: ORDER_12345
+              order_row:
+                type:
+                - string
+                - 'null'
+                description: Purchase order row number related to goods receival transaction. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
+                example: '1'
+              partner_code:
+                type:
+                - string
+                - 'null'
+                description: Supplier code for incoming deliveries.
+                example: SUPPLIER1
+              time:
+                description: Time of the transaction (24h clock hh:mm)
+                pattern: ^(2[0-3]|[01]?[0-9]):([0-5]?[0-9])$
+                type:
+                - string
+                - 'null'
+                example: '15:05'
+              order_type:
+                type:
+                - string
+                - 'null'
+                description: Additional transaction type. E.g. delivery channel for deliveries (from supplier, from DC)
+                example: DC
+              purchase_price:
+                type:
+                - number
+                - 'null'
+                description: Purchase cost of the whole sales transaction
+                example: 24
+              expiration_date:
+                type:
+                - string
+                - 'null'
+                format: date
+                description: Expiration date of the goods received.
+                example: '2018-06-01'
+            $schema: https://json-schema.org/draft/2020-12/schema
+            additionalProperties: false
+        open_purchase_orders:
           type: array
           items:
-            type: array
-            items:
-              type: object
-              $ref: '#/components/schemas/inventory_event'
-    retail_goods_received_request_body:
-      type: object
+            type: object
+            required:
+            - type
+            - date
+            - quantity
+            - estimated_date
+            properties:
+              type:
+                type: string
+                minLength: 1
+                description: ORDER = Open purchase order (can be linked to DELIVERY with a reference number)
+                example: ORDER
+                enum:
+                - ORDER
+              date:
+                type: string
+                minLength: 1
+                format: date
+                description: Snapshot's date. The open order row has to be received every day the order remains open. Once it's delivered, the open order row is not sent anymore. For example, if an order is created on Jan 3rd and the snapshot date is Jan 8th, then the date field will contain '2018-01-08' assuming the order is still open Jan 8th. Snapshot's date is usually previous day's date except if reading in historical open orders.
+                example: '2018-05-25'
+              quantity:
+                type: number
+                description: Open order quantity in inventory units (e.g. pieces). Quantity sign defines the transaction direction as seen by the warehouse, e.g. incoming purchase order is sent as positive quantity. All quantities should be given in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit).
+                example: 0
+              value:
+                type:
+                - number
+                - 'null'
+                description: Value of the whole transaction in the location's currency (e.g. €, £, $). Value should always be positive. Transaction quantity determines the direction of the transaction.
+                minimum: 0
+                example: 47.76
+              estimated_date:
+                type: string
+                format: date
+                description: Estimated delivery date of the order.
+                example: '2018-06-01'
+              order_requested_date:
+                type:
+                - string
+                - 'null'
+                format: date
+                description: Requested delivery date of the order. Can be used for measuring delivery accuracy.
+                example: '2019-07-03'
+              reference:
+                type:
+                - string
+                - 'null'
+                description: Purchase order number. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
+                example: ORDER_12345
+              order_row:
+                type:
+                - string
+                - 'null'
+                description: Purchase order row number. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
+                example: '1'
+              order_proposal_reference:
+                type:
+                - number
+                - 'null'
+                description: RELEX order proposal reference number. The order proposal number sent by RELEX to track open purchase orders.
+                example: 5314130
+              transaction_uid:
+                type:
+                - string
+                - 'null'
+                description: Transaction UID. Unique identifier for transaction row. Can be used as key for updates to the row.
+                example: TID12345
+              order_type:
+                type:
+                - string
+                - 'null'
+                description: Additional order type that can be used to distinct normal open orders from special open orders.
+                example: SPECIAL_PURCHASE_ORDER
+              partner_code:
+                type:
+                - string
+                - 'null'
+                description: Supplier code for purchase orders.
+                example: SUPPLIER1
+              estimated_delivery_time:
+                description: Estimated delivery time (24h clock hh:mm)
+                pattern: ^(2[0-3]|[01]?[0-9]):([0-5]?[0-9])$
+                type:
+                - string
+                - 'null'
+                example: '15:05'
+              expiration_date:
+                type:
+                - string
+                - 'null'
+                format: date
+                description: Expiration date of the goods to be received.
+                example: '2020-09-18'
+            $schema: https://json-schema.org/draft/2020-12/schema
+            additionalProperties: false
       required:
-      - data
-      additionalProperties: false
-      properties:
-        meta:
-          type: object
-          $ref: '#/components/schemas/inbound_meta'
-        data:
-          type: array
-          items:
-            type: array
-            items:
-              type: object
-              $ref: '#/components/schemas/goods_received'
-    problem_details_general:
-      description: Implementation of [RFC7807](https://tools.ietf.org/html/rfc7807) Problem Details object.  Content type should always be ```application/problem+json```.  Problem type definitions MAY extend the problem details object with additional members
-      type: object
-      required:
-      - type
-      - title
-      - status
-      properties:
-        type:
-          description: A URI reference [RFC3986] that identifies the problem type.
-          type: string
-          format: uri
-          example: https://relexsolutions.com/issue
-        title:
-          description: A short, human-readable summary of the problem type.
-          type: string
-          example: Bad Request
-        status:
-          description: The HTTP status code ([RFC7231], Section 6) generated by the origin server for this occurrence of the problem.
-          type: number
-          example: 400
-        detail:
-          description: A human-readable explanation specific to this occurrence of the problem.
-          type: string
-    open_purchase_order:
-      $comment: NOTE!! Any changes to this schema MUST BE MADE also in the goods_received.json schema file that contains this schema as a nested property!
-      type: object
-      properties:
-        type:
-          type: string
-          minLength: 1
-          description: ORDER = Open purchase order (can be linked to DELIVERY with a reference number)
-          example: ORDER
-          enum:
-          - ORDER
-        product:
-          type: string
-          minLength: 1
-          description: Product code (code for finished product or stock keeping unit). Reference to Products.
-          example: PRODUCT1
-        location:
-          type: string
-          minLength: 1
-          description: Inventory location code (i.e. for affected store, warehouse etc.). Reference to Locations.
-          example: LOCATION1
-        date:
-          type: string
-          minLength: 1
-          format: date
-          description: Snapshot's date. The open order row has to be received every day the order remains open. Once it's delivered, the open order row is not sent anymore. For example, if an order is created on Jan 3rd and the snapshot date is Jan 8th, then the date field will contain '2018-01-08' assuming the order is still open Jan 8th. Snapshot's date is usually previous day's date except if reading in historical open orders.
-          example: '2018-05-25'
-        quantity:
-          type: number
-          description: Open order quantity in inventory units (e.g. pieces). Quantity sign defines the transaction direction as seen by the warehouse, e.g. incoming purchase order is sent as positive quantity. All quantities should be given in base unit of measure (e.g. SKU, stock unit, piece, smallest possible unit).
-          example: 24
-        value:
-          type:
-          - number
-          - 'null'
-          description: Value of the whole transaction in the location's currency (e.g.€, £, $). Value should always be positive. Transaction quantity determines the direction of the transaction.
-          minimum: 0
-          example: 47.76
-        estimated_date:
-          type: string
-          format: date
-          description: Estimated delivery date of the order.
-          example: '2018-06-01'
-        order_requested_date:
-          type:
-          - string
-          - 'null'
-          format: date
-          description: Requested delivery date of the order. Can be used for measuring delivery accuracy.
-          example: '2019-07-03'
-        reference:
-          type:
-          - string
-          - 'null'
-          description: Purchase order number. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
-          example: ORDER_12345
-        order_row:
-          type:
-          - string
-          - 'null'
-          description: Purchase order row number. RELEX uses reference code and order row from Delivery & Open purchase order in calculating supplier delivery accuracy metrics.
-          example: '1'
-        order_proposal_reference:
-          type:
-          - number
-          - 'null'
-          description: RELEX order proposal reference number. The order proposal number sent by RELEX to track open purchase orders.
-          example: 5314130
-        transaction_uid:
-          type:
-          - string
-          - 'null'
-          description: Transaction UID. Unique identifier for transaction row. Can be used as key for updates to the row.
-          example: TID12345
-        order_type:
-          type:
-          - string
-          - 'null'
-          description: Additional order type that can be used to distinct normal open orders from special open orders.
-          example: SPECIAL_PURCHASE_ORDER
-        partner_code:
-          type:
-          - string
-          - 'null'
-          description: Supplier code for purchase orders.
-          example: SUPPLIER1
-        estimated_delivery_time:
-          description: Estimated delivery time (24h clock hh:mm)
-          $ref: '#/components/schemas/time'
-        expiration_date:
-          type:
-          - string
-          - 'null'
-          format: date
-          description: Expiration date of the goods to be received.
-          example: '2020-09-18'
-      required:
-      - type
       - product
       - location
-      - date
-      - quantity
-      - estimated_date
       $schema: https://json-schema.org/draft/2020-12/schema
       additionalProperties: false
-    retail_inventory_check_request_body:
-      type: object
-      required:
-      - data
-      additionalProperties: false
-      properties:
-        meta:
-          type: object
-          $ref: '#/components/schemas/inbound_meta'
-        data:
-          type: array
-          items:
-            type: object
-            $ref: '#/components/schemas/inventory_check'
-    problem_details_400:
-      description: Implementation of [RFC7807](https://tools.ietf.org/html/rfc7807) Problem Details object.  Content type should always be ```application/problem+json```.  Problem type definitions MAY extend the problem details object with additional members
-      type: object
-      required:
-      - type
-      - title
-      - status
-      properties:
-        type:
-          description: A URI reference [RFC3986] that identifies the problem type.
-          type: string
-          format: uri
-          example: https://relexsolutions.com/rest/errors/400
-        title:
-          description: A short, human-readable summary of the problem type.
-          type: string
-          example: Bad Request
-        status:
-          description: The HTTP status code ([RFC7231], Section 6) generated by the origin server for this occurrence of the problem.
-          type: number
-          example: 400
-        detail:
-          description: A human-readable explanation specific to this occurrence of the problem.
-          type: string
-          example: validating the payload's JSON schema failed
-        debugging:
-          description: Debugging information for DEV and QA environments.
-          type: string
-        validation_errors:
-          type: array
-          description: A list of issues that exist with the request.
-          items:
-            type: object
-            properties:
-              location:
-                type: string
-              message:
-                type: string
-              violation:
-                type: string
-          example:
-          - location: /data/0
-            message: 'missing properties: ''code'''
-            violation: required
-          - location: /meta/example
-            message: expected string, but got number
-            violation: type
-    retail_open_sales_order_request_body:
-      type: object
-      required:
-      - data
-      additionalProperties: false
-      properties:
-        meta:
-          type: object
-          $ref: '#/components/schemas/inbound_meta'
-        data:
-          type: array
-          items:
-            type: object
-            $ref: '#/components/schemas/open_sales_order'
+    time:
+      pattern: ^(2[0-3]|[01]?[0-9]):([0-5]?[0-9])$
+      type:
+      - string
+      - 'null'
+      example: '15:05'
   responses:
-    Accepted:
-      description: 'Accepted: Request was accepted. Data is forwarded for further processing.'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/accepted'
     Problem413Response:
       description: Content Too Large
       content:
@@ -3883,12 +3877,33 @@ components:
             title: Payload Too Large
             status: 413
             detail: Payload was larger than 1mb
-    Problem400Response:
-      description: Bad Request
+    Problem429Response:
+      description: Too Many Requests
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/problem_details_400'
+            $ref: '#/components/schemas/problem_details_general'
+          example:
+            type: https://relexsolutions.com/rest/errors/429
+            title: Too Many Requests
+            status: 429
+            detail: 'Rate limit has been exceeded: The request could not be completed due to the client exceeding the request limit.'
+    Problem401Response:
+      description: Unauthorized
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problem_details_general'
+          example:
+            type: https://relexsolutions.com/rest/errors/401
+            title: Unauthorized
+            status: 401
+    Accepted:
+      description: 'Accepted: Request was accepted. Data is forwarded for further processing.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/accepted'
     Problem404Response:
       description: Page Not Found
       content:
@@ -3899,6 +3914,12 @@ components:
             type: https://relexsolutions.com/rest/errors/404
             title: Page Not Found
             status: 404
+    Problem400Response:
+      description: Bad Request
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problem_details_400'
     Problem5xxResponse:
       description: Internal Server Error
       content:
@@ -3920,27 +3941,6 @@ components:
             type: https://relexsolutions.com/rest/errors/403
             title: Forbidden
             status: 403
-    Problem401Response:
-      description: Unauthorized
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/problem_details_general'
-          example:
-            type: https://relexsolutions.com/rest/errors/401
-            title: Unauthorized
-            status: 401
-    Problem429Response:
-      description: Too Many Requests
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/problem_details_general'
-          example:
-            type: https://relexsolutions.com/rest/errors/429
-            title: Too Many Requests
-            status: 429
-            detail: 'Rate limit has been exceeded: The request could not be completed due to the client exceeding the request limit.'
   parameters:
     HttpHeader:
       in: header

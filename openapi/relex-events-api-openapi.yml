@@ -346,272 +346,6 @@ components:
           description: Critical error text
           type: string
           example: The file you are looking for may have been moved or deleted
-    FileEventResult:
-      description: A complete description of all the requested file events
-      unevaluatedProperties: false
-      required:
-      - meta
-      - data
-      - _links
-      properties:
-        meta:
-          description: General metadata about the response
-          $ref: '#/components/schemas/meta'
-        data:
-          description: List of events matching the query parameters
-          type: array
-          items:
-            type: object
-            unevaluatedProperties: false
-            required:
-            - file
-            - status
-            - direction
-            - timestamp
-            - events
-            properties:
-              file:
-                description: Input file name
-                type: string
-                minLength: 1
-                maxLength: 512
-                example: Sales_051_20231221T111029_130706.json
-              input_url:
-                description: Full path of an input file on the file server
-                type: string
-                format: uri
-                example: sftp://sftpexample-customerfim@sftp-example.relexsolutions.com/data/input/Sales_051_20231221T111029_130706.json
-              output_url:
-                description: Full path of an output file on the file server
-                type: string
-                format: uri
-                example: https://example-external-abs.blob.core.windows.net/output/Sales_051_20231221T111029_130706
-              application:
-                description: Application the file was delivered to (inbound) or exported from (outbound)
-                type: string
-                enum:
-                - Plan
-                - Promo
-                examples:
-                - Plan
-                - Promo
-              job_id:
-                description: RELEX Plan job id associated with the file event
-                type: string
-                pattern: ^[0-9]+$
-                example: '12345'
-              direction:
-                description: Integration direction, inbound or outbound
-                type: string
-                enum:
-                - inbound
-                - outbound
-                example: inbound
-              status:
-                description: Current event flow status
-                type: string
-                enum:
-                - Received
-                - Processing
-                - Processed
-                - Exported
-                - Delivering
-                - Delivered
-                - Warning
-                - Error
-                example: Processing
-              timestamp:
-                description: Time of the last flow event occurrence
-                type: string
-                format: date-time
-                example: '2023-12-01T02:55:39Z'
-              file_size:
-                description: Size of the input file in bytes
-                type: integer
-                example: 359
-              events:
-                description: Detailed events that were executed on the file
-                type: array
-                items:
-                  $ref: '#/components/schemas/event'
-              errors:
-                description: Critical errors that took place during operations on the input file, if any
-                type: array
-                items:
-                  $ref: '#/components/schemas/error'
-            oneOf:
-            - required:
-              - input_url
-            - required:
-              - output_url
-          example:
-          - file: E-10003.BSAPPRODUCTLDSRELEX_6700_20231130224506.csv
-            input_url: sftp://sftpexample-customerfim@sftp-example.relexsolutions.com/data/input/E-10003.BSAPPRODUCTLDSRELEX_6700_20231130224506.csv
-            direction: inbound
-            status: Received
-            timestamp: '2023-12-01T02:55:39Z'
-            file_size: 359
-            events:
-            - title: File received
-              timestamp: '2023-12-01T02:55:39Z'
-          - file: E-10003.BSAPCAMPAIGNLRELEX20231130224800.csv
-            input_url: sftp://sftpexample-customerfim@sftp-example.relexsolutions.com/data/input/E-10003.BSAPCAMPAIGNLRELEX20231130224800.csv
-            direction: inbound
-            status: Processing
-            timestamp: '2023-12-01T04:00:10Z'
-            file_size: 359
-            events:
-            - title: File received
-              timestamp: '2023-12-01T02:55:39Z'
-            - title: File preparation started
-              timestamp: '2023-12-01T04:00:10Z'
-          - file: E-10003.BSAPPRODUCTLDSRELEX_6400_20231130224503.csv
-            input_url: sftp://sftpexample-customerfim@sftp-example.relexsolutions.com/data/input/E-10003.BSAPPRODUCTLDSRELEX_6400_20231130224503.csv
-            application: Plan
-            job_id: '12345'
-            direction: inbound
-            status: Processed
-            timestamp: '2023-12-04T05:07:33Z'
-            file_size: 359
-            events:
-            - title: File received
-              timestamp: '2023-12-01T02:55:39Z'
-            - title: File preparation started
-              timestamp: '2023-12-01T04:00:10Z'
-            - title: File preparation completed
-              timestamp: '2023-12-01T04:00:11Z'
-            - title: File import started
-              timestamp: '2023-12-01T04:01:46Z'
-              file_rows:
-                total: 100
-                skipped: 0
-            - title: File import completed
-              timestamp: '2023-12-04T05:07:33Z'
-          - file: transactions_20251204_110001.csv
-            input_url: https://example-storage.blob.core.windows.net/input/transactions_20251204_110001.csv
-            status: Warning
-            direction: inbound
-            file_size: 694713
-            timestamp: '2025-12-04T14:12:10Z'
-            events:
-            - title: File received
-              timestamp: '2025-12-04T11:36:01Z'
-            - title: File preparation started
-              timestamp: '2025-12-04T14:11:48Z'
-              file_rows:
-                total: 5973
-                skipped: 1339
-              warnings:
-              - details: Null value in non-null column relex_transaction_type
-                count: 1326
-                example_rows:
-                - 2025-12-03,LOC01,LOC02,,-6.0,CS,-6.0,CS,REF001,Invoice,TYPE1,CAT1,ORD001,ID001,SO
-                - 2025-12-03,LOC01,LOC02,,-1.0,CS,-1.0,CS,REF002,Invoice,TYPE1,CAT1,ORD002,ID002,SO
-                - 2025-12-03,LOC01,LOC02,,-35.0,CS,-35.0,CS,REF003,Invoice,TYPE1,CAT1,ORD003,ID003,SO
-                - 2025-12-03,LOC01,LOC02,,-8.0,CS,-8.0,CS,REF004,Invoice,TYPE1,CAT1,ORD004,ID004,SO
-                - 2025-12-03,LOC01,LOC02,,-36.0,CS,-36.0,CS,REF005,Invoice,TYPE1,CAT1,ORD005,ID005,SO
-              - details: Null value in non-null column primary_qty
-                count: 13
-                example_rows:
-                - 2025-12-03,LOC03,SKU01,DELIVERY,,LB,40.0,CS,REF006,IR Description,TYPE2,CAT2,ORD006,ID006,OT
-                - 2025-12-03,LOC03,SKU02,DELIVERY,,LB,60.0,CS,REF007,IR Description,TYPE2,CAT2,ORD007,ID007,OT
-                - 2025-12-03,LOC03,SKU03,DELIVERY,,LB,60.0,CS,REF008,IR Description,TYPE2,CAT2,ORD008,ID008,OT
-                - 2025-12-03,LOC03,SKU04,DELIVERY,,LB,55.0,CS,REF009,IR Description,TYPE2,CAT2,ORD009,ID009,OT
-                - 2025-12-03,LOC01,SKU05,DELIVERY,,LB,192.0,CS,REF010,IR Description,TYPE2,CAT2,ORD010,ID010,OP
-            - title: File preparation completed
-              timestamp: '2025-12-04T14:12:10Z'
-              file_rows:
-                total: 4634
-                skipped: 0
-          - file: E-10003.BSAPINVTRANSRELEX_6500_20231201023001.csv
-            input_url: sftp://sftpexample-customerfim@sftp-example.relexsolutions.com/data/input/E-10003.BSAPINVTRANSRELEX_6500_20231201023001.csv
-            direction: inbound
-            status: Error
-            timestamp: '2023-12-01T04:00:10Z'
-            file_size: 359
-            events:
-            - title: File received
-              timestamp: '2023-12-01T02:55:39Z'
-            - title: File preparation started
-              timestamp: '2023-12-01T04:00:10Z'
-            errors:
-            - title: File validation failed
-              details: 'Validation failed: invalid value "QTY" for column "batch_size"'
-          - file: Transaction_aaTYk_2025-06-06_05:05:50.csv
-            output_url: https://example-external-abs.blob.core.windows.net/output/Transaction_aaTYk_2025-06-06_05:05:50.csv
-            application: Promo
-            status: Delivered
-            direction: outbound
-            timestamp: '2025-06-06T05:06:50Z'
-            events:
-            - title: Export file created
-              timestamp: '2025-06-06T05:05:50Z'
-            - title: Export file uploaded to customer-facing storage
-              timestamp: '2025-06-06T05:06:50Z'
-        _links:
-          description: Pagination links following HAL standard
-          unevaluatedProperties: false
-          allOf:
-          - $ref: '#/components/schemas/_links'
-          - type: object
-            properties:
-              next:
-                type: object
-                unevaluatedProperties: false
-                properties:
-                  href:
-                    type: string
-                    format: uri-reference
-                    example: /api/v1/example-customer/events/file?page=2
-              self:
-                type: object
-                unevaluatedProperties: false
-                properties:
-                  href:
-                    type: string
-                    format: uri-reference
-                    example: /api/v1/example-customer/events/file
-    _links:
-      required:
-      - self
-      type: object
-      unevaluatedProperties: false
-      description: Pagination as per the HAL standard
-      properties:
-        next:
-          properties:
-            href:
-              type: string
-              format: uri-reference
-              description: Next page link
-              example: /api/v1/example-customer/events/file?page=2
-          type: object
-          unevaluatedProperties: false
-          description: Next page link container, present only if next page has data
-        self:
-          properties:
-            href:
-              type: string
-              format: uri-reference
-              description: Self link
-              example: /api/v1/example-customer/events/file
-          type: object
-          unevaluatedProperties: false
-          description: Self link container, always present
-    meta:
-      required:
-      - customer
-      - version
-      unevaluatedProperties: false
-      properties:
-        customer:
-          type: string
-          description: Customer identifier
-          example: example-customer
-        version:
-          type: string
-          description: monitoring-api service version
-          example: v1
     RequestError:
       type: object
       unevaluatedProperties: false
@@ -884,6 +618,258 @@ components:
                     type: string
                     format: uri-reference
                     example: /api/v1/example-customer/events/job
+    _links:
+      required:
+      - self
+      type: object
+      unevaluatedProperties: false
+      description: Pagination as per the HAL standard
+      properties:
+        next:
+          properties:
+            href:
+              type: string
+              format: uri-reference
+              description: Next page link
+              example: /api/v1/example-customer/events/file?page=2
+          type: object
+          unevaluatedProperties: false
+          description: Next page link container, present only if next page has data
+        self:
+          properties:
+            href:
+              type: string
+              format: uri-reference
+              description: Self link
+              example: /api/v1/example-customer/events/file
+          type: object
+          unevaluatedProperties: false
+          description: Self link container, always present
+    FileEventResult:
+      description: A complete description of all the requested file events
+      unevaluatedProperties: false
+      required:
+      - meta
+      - data
+      - _links
+      properties:
+        meta:
+          description: General metadata about the response
+          $ref: '#/components/schemas/meta'
+        data:
+          description: List of events matching the query parameters
+          type: array
+          items:
+            type: object
+            unevaluatedProperties: false
+            required:
+            - file
+            - status
+            - direction
+            - timestamp
+            - events
+            properties:
+              file:
+                description: Input file name
+                type: string
+                minLength: 1
+                maxLength: 512
+                example: Sales_051_20231221T111029_130706.json
+              input_url:
+                description: Full path of an input file on the file server
+                type: string
+                format: uri
+                example: sftp://sftpexample-customerfim@sftp-example.relexsolutions.com/data/input/Sales_051_20231221T111029_130706.json
+              output_url:
+                description: Full path of an output file on the file server
+                type: string
+                format: uri
+                example: https://example-external-abs.blob.core.windows.net/output/Sales_051_20231221T111029_130706
+              application:
+                description: Application the file was delivered to (inbound) or exported from (outbound)
+                type: string
+                enum:
+                - Plan
+                - Promo
+                examples:
+                - Plan
+                - Promo
+              job_id:
+                description: RELEX Plan job id associated with the file event
+                type: string
+                pattern: ^[0-9]+$
+                example: '12345'
+              direction:
+                description: Integration direction, inbound or outbound
+                type: string
+                enum:
+                - inbound
+                - outbound
+                example: inbound
+              status:
+                description: Current event flow status
+                type: string
+                enum:
+                - Received
+                - Processing
+                - Processed
+                - Exported
+                - Delivering
+                - Delivered
+                - Warning
+                - Error
+                example: Processing
+              timestamp:
+                description: Time of the last flow event occurrence
+                type: string
+                format: date-time
+                example: '2023-12-01T02:55:39Z'
+              file_size:
+                description: Size of the input file in bytes
+                type: integer
+                example: 359
+              events:
+                description: Detailed events that were executed on the file
+                type: array
+                items:
+                  $ref: '#/components/schemas/event'
+              errors:
+                description: Critical errors that took place during operations on the input file, if any
+                type: array
+                items:
+                  $ref: '#/components/schemas/error'
+            oneOf:
+            - required:
+              - input_url
+            - required:
+              - output_url
+          example:
+          - file: E-10003.BSAPPRODUCTLDSRELEX_6700_20231130224506.csv
+            input_url: sftp://sftpexample-customerfim@sftp-example.relexsolutions.com/data/input/E-10003.BSAPPRODUCTLDSRELEX_6700_20231130224506.csv
+            direction: inbound
+            status: Received
+            timestamp: '2023-12-01T02:55:39Z'
+            file_size: 359
+            events:
+            - title: File received
+              timestamp: '2023-12-01T02:55:39Z'
+          - file: E-10003.BSAPCAMPAIGNLRELEX20231130224800.csv
+            input_url: sftp://sftpexample-customerfim@sftp-example.relexsolutions.com/data/input/E-10003.BSAPCAMPAIGNLRELEX20231130224800.csv
+            direction: inbound
+            status: Processing
+            timestamp: '2023-12-01T04:00:10Z'
+            file_size: 359
+            events:
+            - title: File received
+              timestamp: '2023-12-01T02:55:39Z'
+            - title: File preparation started
+              timestamp: '2023-12-01T04:00:10Z'
+          - file: E-10003.BSAPPRODUCTLDSRELEX_6400_20231130224503.csv
+            input_url: sftp://sftpexample-customerfim@sftp-example.relexsolutions.com/data/input/E-10003.BSAPPRODUCTLDSRELEX_6400_20231130224503.csv
+            application: Plan
+            job_id: '12345'
+            direction: inbound
+            status: Processed
+            timestamp: '2023-12-04T05:07:33Z'
+            file_size: 359
+            events:
+            - title: File received
+              timestamp: '2023-12-01T02:55:39Z'
+            - title: File preparation started
+              timestamp: '2023-12-01T04:00:10Z'
+            - title: File preparation completed
+              timestamp: '2023-12-01T04:00:11Z'
+            - title: File import started
+              timestamp: '2023-12-01T04:01:46Z'
+              file_rows:
+                total: 100
+                skipped: 0
+            - title: File import completed
+              timestamp: '2023-12-04T05:07:33Z'
+          - file: transactions_20251204_110001.csv
+            input_url: https://example-storage.blob.core.windows.net/input/transactions_20251204_110001.csv
+            status: Warning
+            direction: inbound
+            file_size: 694713
+            timestamp: '2025-12-04T14:12:10Z'
+            events:
+            - title: File received
+              timestamp: '2025-12-04T11:36:01Z'
+            - title: File preparation started
+              timestamp: '2025-12-04T14:11:48Z'
+              file_rows:
+                total: 5973
+                skipped: 1339
+              warnings:
+              - details: Null value in non-null column relex_transaction_type
+                count: 1326
+                example_rows:
+                - 2025-12-03,LOC01,LOC02,,-6.0,CS,-6.0,CS,REF001,Invoice,TYPE1,CAT1,ORD001,ID001,SO
+                - 2025-12-03,LOC01,LOC02,,-1.0,CS,-1.0,CS,REF002,Invoice,TYPE1,CAT1,ORD002,ID002,SO
+                - 2025-12-03,LOC01,LOC02,,-35.0,CS,-35.0,CS,REF003,Invoice,TYPE1,CAT1,ORD003,ID003,SO
+                - 2025-12-03,LOC01,LOC02,,-8.0,CS,-8.0,CS,REF004,Invoice,TYPE1,CAT1,ORD004,ID004,SO
+                - 2025-12-03,LOC01,LOC02,,-36.0,CS,-36.0,CS,REF005,Invoice,TYPE1,CAT1,ORD005,ID005,SO
+              - details: Null value in non-null column primary_qty
+                count: 13
+                example_rows:
+                - 2025-12-03,LOC03,SKU01,DELIVERY,,LB,40.0,CS,REF006,IR Description,TYPE2,CAT2,ORD006,ID006,OT
+                - 2025-12-03,LOC03,SKU02,DELIVERY,,LB,60.0,CS,REF007,IR Description,TYPE2,CAT2,ORD007,ID007,OT
+                - 2025-12-03,LOC03,SKU03,DELIVERY,,LB,60.0,CS,REF008,IR Description,TYPE2,CAT2,ORD008,ID008,OT
+                - 2025-12-03,LOC03,SKU04,DELIVERY,,LB,55.0,CS,REF009,IR Description,TYPE2,CAT2,ORD009,ID009,OT
+                - 2025-12-03,LOC01,SKU05,DELIVERY,,LB,192.0,CS,REF010,IR Description,TYPE2,CAT2,ORD010,ID010,OP
+            - title: File preparation completed
+              timestamp: '2025-12-04T14:12:10Z'
+              file_rows:
+                total: 4634
+                skipped: 0
+          - file: E-10003.BSAPINVTRANSRELEX_6500_20231201023001.csv
+            input_url: sftp://sftpexample-customerfim@sftp-example.relexsolutions.com/data/input/E-10003.BSAPINVTRANSRELEX_6500_20231201023001.csv
+            direction: inbound
+            status: Error
+            timestamp: '2023-12-01T04:00:10Z'
+            file_size: 359
+            events:
+            - title: File received
+              timestamp: '2023-12-01T02:55:39Z'
+            - title: File preparation started
+              timestamp: '2023-12-01T04:00:10Z'
+            errors:
+            - title: File validation failed
+              details: 'Validation failed: invalid value "QTY" for column "batch_size"'
+          - file: Transaction_aaTYk_2025-06-06_05:05:50.csv
+            output_url: https://example-external-abs.blob.core.windows.net/output/Transaction_aaTYk_2025-06-06_05:05:50.csv
+            application: Promo
+            status: Delivered
+            direction: outbound
+            timestamp: '2025-06-06T05:06:50Z'
+            events:
+            - title: Export file created
+              timestamp: '2025-06-06T05:05:50Z'
+            - title: Export file uploaded to customer-facing storage
+              timestamp: '2025-06-06T05:06:50Z'
+        _links:
+          description: Pagination links following HAL standard
+          unevaluatedProperties: false
+          allOf:
+          - $ref: '#/components/schemas/_links'
+          - type: object
+            properties:
+              next:
+                type: object
+                unevaluatedProperties: false
+                properties:
+                  href:
+                    type: string
+                    format: uri-reference
+                    example: /api/v1/example-customer/events/file?page=2
+              self:
+                type: object
+                unevaluatedProperties: false
+                properties:
+                  href:
+                    type: string
+                    format: uri-reference
+                    example: /api/v1/example-customer/events/file
     event:
       unevaluatedProperties: false
       properties:
@@ -949,6 +935,20 @@ components:
       required:
       - title
       - timestamp
+    meta:
+      required:
+      - customer
+      - version
+      unevaluatedProperties: false
+      properties:
+        customer:
+          type: string
+          description: Customer identifier
+          example: example-customer
+        version:
+          type: string
+          description: monitoring-api service version
+          example: v1
   securitySchemes:
     oauth2:
       type: oauth2
