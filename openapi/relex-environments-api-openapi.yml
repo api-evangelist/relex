@@ -77,19 +77,6 @@ paths:
       - oauth2: []
 components:
   schemas:
-    EnvironmentResult:
-      required:
-      - environments
-      unevaluatedProperties: false
-      properties:
-        environments:
-          description: List of available environment names for the customer
-          type: array
-          items:
-            type: string
-            minLength: 1
-            maxLength: 20
-            example: dev
     RequestError:
       type: object
       unevaluatedProperties: false
@@ -139,6 +126,19 @@ components:
                 type: string
                 description: Validation error message
                 example: env must be at least 1 character in length
+    EnvironmentResult:
+      required:
+      - environments
+      unevaluatedProperties: false
+      properties:
+        environments:
+          description: List of available environment names for the customer
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 20
+            example: dev
   securitySchemes:
     oauth2:
       type: oauth2

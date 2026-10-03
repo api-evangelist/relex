@@ -121,6 +121,44 @@ paths:
           $ref: '#/components/responses/Problem5xxResponse'
 components:
   responses:
+    Problem5xxResponse:
+      description: Internal Server Error
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problem_details_general'
+          example:
+            type: https://relexsolutions.com/rest/errors/500
+            title: An internal error occurred.
+            status: 500
+            detail: The server is unable to process the request.
+    Problem400Response:
+      description: Bad Request
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problem_details_400'
+    Problem429Response:
+      description: Too Many Requests
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problem_details_general'
+          example:
+            type: https://relexsolutions.com/rest/errors/429
+            title: Too Many Requests
+            status: 429
+            detail: 'Rate limit has been exceeded: The request could not be completed due to the client exceeding the request limit.'
+    Problem403Response:
+      description: Forbidden
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problem_details_general'
+          example:
+            type: https://relexsolutions.com/rest/errors/403
+            title: Forbidden
+            status: 403
     Problem413Response:
       description: Content Too Large
       content:
@@ -142,44 +180,6 @@ components:
             type: https://relexsolutions.com/rest/errors/404
             title: Page Not Found
             status: 404
-    Problem400Response:
-      description: Bad Request
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/problem_details_400'
-    Problem429Response:
-      description: Too Many Requests
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/problem_details_general'
-          example:
-            type: https://relexsolutions.com/rest/errors/429
-            title: Too Many Requests
-            status: 429
-            detail: 'Rate limit has been exceeded: The request could not be completed due to the client exceeding the request limit.'
-    Problem5xxResponse:
-      description: Internal Server Error
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/problem_details_general'
-          example:
-            type: https://relexsolutions.com/rest/errors/500
-            title: An internal error occurred.
-            status: 500
-            detail: The server is unable to process the request.
-    Problem403Response:
-      description: Forbidden
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/problem_details_general'
-          example:
-            type: https://relexsolutions.com/rest/errors/403
-            title: Forbidden
-            status: 403
     Problem401Response:
       description: Unauthorized
       content:
@@ -191,46 +191,6 @@ components:
             title: Unauthorized
             status: 401
   parameters:
-    start_timestamp:
-      description: Start timestamp (inclusive), required unless request_id is specified
-      in: query
-      name: start_timestamp
-      example: '2023-06-13T00:00:00.000Z'
-      schema:
-        format: date-time
-        type: string
-    HttpHeader:
-      in: header
-      name: Content-Type
-      description: The media type in the Content-Type header must be specified and must be _application/json_. The character encoding of the data is expected to be UTF-8.
-      required: true
-      example: application/json
-      schema:
-        type: string
-    request_id:
-      description: Request ID, required unless timestamp parameters are specified
-      in: query
-      name: request_id
-      example: c88ca2da-5e77-4f63-bbee-61df9edf591f
-      schema:
-        format: uuid
-        type: string
-    page:
-      description: Page number, 1-based
-      in: query
-      name: page
-      example: 1
-      schema:
-        type: integer
-        default: 1
-    end_timestamp:
-      description: End timestamp (inclusive), required unless request_id is specified
-      in: query
-      name: end_timestamp
-      example: '2023-06-14T12:34:56.999Z'
-      schema:
-        format: date-time
-        type: string
     per_page:
       description: Number of records per page
       in: query
@@ -240,8 +200,48 @@ components:
         type: integer
         default: 500
         maximum: 10000
+    end_timestamp:
+      description: End timestamp (inclusive), required unless request_id is specified
+      in: query
+      name: end_timestamp
+      example: '2023-06-14T12:34:56.999Z'
+      schema:
+        format: date-time
+        type: string
+    page:
+      description: Page number, 1-based
+      in: query
+      name: page
+      example: 1
+      schema:
+        type: integer
+        default: 1
+    start_timestamp:
+      description: Start timestamp (inclusive), required unless request_id is specified
+      in: query
+      name: start_timestamp
+      example: '2023-06-13T00:00:00.000Z'
+      schema:
+        format: date-time
+        type: string
+    request_id:
+      description: Request ID, required unless timestamp parameters are specified
+      in: query
+      name: request_id
+      example: c88ca2da-5e77-4f63-bbee-61df9edf591f
+      schema:
+        format: uuid
+        type: string
+    HttpHeader:
+      in: header
+      name: Content-Type
+      description: The media type in the Content-Type header must be specified and must be _application/json_. The character encoding of the data is expected to be UTF-8.
+      required: true
+      example: application/json
+      schema:
+        type: string
   schemas:
-    problem_details_general:
+    problem_details_400:
       description: Implementation of [RFC7807](https://tools.ietf.org/html/rfc7807) Problem Details object.  Content type should always be ```application/problem+json```.  Problem type definitions MAY extend the problem details object with additional members
       type: object
       required:
@@ -253,7 +253,7 @@ components:
           description: A URI reference [RFC3986] that identifies the problem type.
           type: string
           format: uri
-          example: https://relexsolutions.com/issue
+          example: https://relexsolutions.com/rest/errors/400
         title:
           description: A short, human-readable summary of the problem type.
           type: string
@@ -265,54 +265,29 @@ components:
         detail:
           description: A human-readable explanation specific to this occurrence of the problem.
           type: string
-    health:
-      type: object
-      properties:
-        meta:
-          type: object
-          properties:
-            code:
-              type: number
-              description: HTTP response code
-              example: 200
-            message:
-              type: string
-              description: HTTP response message
-              example: OK
-        data:
-          type: object
-      $schema: https://json-schema.org/draft/2020-12/schema
-      additionalProperties: false
-    version:
-      type: object
-      properties:
-        meta:
-          type: object
-          properties:
-            code:
-              type: number
-              description: HTTP response code
-              example: 200
-            message:
-              type: string
-              description: HTTP response message
-              example: OK
-        data:
-          type: object
-          properties:
-            api_version:
-              type: string
-              description: API version according to OpenAPI specification
-              example: v2.7.7-prelease
-            core_version:
-              type: string
-              description: Version number including core dependencies of REST API
-              example: v1.2.3
-            data_version:
-              type: string
-              description: Data model version
-              example: v3.2.1
-      $schema: https://json-schema.org/draft/2020-12/schema
+          example: validating the payload's JSON schema failed
+        debugging:
+          description: Debugging information for DEV and QA environments.
+          type: string
+        validation_errors:
+          type: array
+          description: A list of issues that exist with the request.
+          items:
+            type: object
+            properties:
+              location:
+                type: string
+              message:
+                type: string
+              violation:
+                type: string
+          example:
+          - location: /data/0
+            message: 'missing properties: ''code'''
+            violation: required
+          - location: /meta/example
+            message: expected string, but got number
+            violation: type
     errors:
       type: object
       properties:
@@ -400,7 +375,55 @@ components:
           additionalProperties: false
       additionalProperties: false
       $schema: https://json-schema.org/draft/2020-12/schema
-    problem_details_400:
+    health:
+      type: object
+      properties:
+        meta:
+          type: object
+          properties:
+            code:
+              type: number
+              description: HTTP response code
+              example: 200
+            message:
+              type: string
+              description: HTTP response message
+              example: OK
+        data:
+          type: object
+      $schema: https://json-schema.org/draft/2020-12/schema
+      additionalProperties: false
+    version:
+      type: object
+      properties:
+        meta:
+          type: object
+          properties:
+            code:
+              type: number
+              description: HTTP response code
+              example: 200
+            message:
+              type: string
+              description: HTTP response message
+              example: OK
+        data:
+          type: object
+          properties:
+            api_version:
+              type: string
+              description: API version according to OpenAPI specification
+              example: v2.7.7-prelease
+            core_version:
+              type: string
+              description: Version number including core dependencies of REST API
+              example: v1.2.3
+            data_version:
+              type: string
+              description: Data model version
+              example: v3.2.1
+      $schema: https://json-schema.org/draft/2020-12/schema
+    problem_details_general:
       description: Implementation of [RFC7807](https://tools.ietf.org/html/rfc7807) Problem Details object.  Content type should always be ```application/problem+json```.  Problem type definitions MAY extend the problem details object with additional members
       type: object
       required:
@@ -412,7 +435,7 @@ components:
           description: A URI reference [RFC3986] that identifies the problem type.
           type: string
           format: uri
-          example: https://relexsolutions.com/rest/errors/400
+          example: https://relexsolutions.com/issue
         title:
           description: A short, human-readable summary of the problem type.
           type: string
@@ -424,29 +447,6 @@ components:
         detail:
           description: A human-readable explanation specific to this occurrence of the problem.
           type: string
-          example: validating the payload's JSON schema failed
-        debugging:
-          description: Debugging information for DEV and QA environments.
-          type: string
-        validation_errors:
-          type: array
-          description: A list of issues that exist with the request.
-          items:
-            type: object
-            properties:
-              location:
-                type: string
-              message:
-                type: string
-              violation:
-                type: string
-          example:
-          - location: /data/0
-            message: 'missing properties: ''code'''
-            violation: required
-          - location: /meta/example
-            message: expected string, but got number
-            violation: type
   securitySchemes:
     OAuth2:
       type: oauth2

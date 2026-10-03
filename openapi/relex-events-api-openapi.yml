@@ -335,66 +335,20 @@ paths:
       - oauth2: []
 components:
   schemas:
-    error:
-      unevaluatedProperties: false
-      properties:
-        title:
-          description: Textual representation of the event during which the error has occurred
-          type: string
-          example: File preparation started
-        details:
-          description: Critical error text
-          type: string
-          example: The file you are looking for may have been moved or deleted
-    RequestError:
-      type: object
-      unevaluatedProperties: false
+    meta:
       required:
-      - type
-      - title
-      - status
-      - detail
-      - instance
+      - customer
+      - version
+      unevaluatedProperties: false
       properties:
-        type:
+        customer:
           type: string
-          description: Error type description
-          example: ValidationError
-        title:
+          description: Customer identifier
+          example: example-customer
+        version:
           type: string
-          description: Error general title
-          example: Request parameters validation error
-        status:
-          type: integer
-          description: Response code
-          example: 400
-        detail:
-          type: string
-          description: Detailed error description
-          example: One or more errors occurred while validating request parameters
-        instance:
-          type: string
-          format: uri-reference
-          description: A URI reference that identifies the specific occurrence of the problem
-          example: /api/v1/example-customer/events/file?env=
-        errors:
-          description: An array of validation errors in case there were any
-          type: array
-          items:
-            type: object
-            unevaluatedProperties: false
-            required:
-            - parameter
-            - reason
-            properties:
-              parameter:
-                type: string
-                description: The name of the parameter which failed validation
-                example: env
-              reason:
-                type: string
-                description: Validation error message
-                example: env must be at least 1 character in length
+          description: monitoring-api service version
+          example: v1
     JobEventResult:
       description: A complete description of all the requested job events
       unevaluatedProperties: false
@@ -618,6 +572,120 @@ components:
                     type: string
                     format: uri-reference
                     example: /api/v1/example-customer/events/job
+    event:
+      unevaluatedProperties: false
+      properties:
+        title:
+          description: Textual representation of the event
+          type: string
+          enum:
+          - File received
+          - File preparation started
+          - File preparation completed
+          - File is ready for processing
+          - File import started
+          - File import completed
+          - Export file created
+          - Export file ready for preparation
+          - Export file uploaded to customer-facing storage
+          example: File received
+        timestamp:
+          description: Time of the last file operation at this step
+          type: string
+          format: date-time
+          example: '2025-12-04T14:11:48Z'
+        file_rows:
+          description: Information about individual data rows in the uploaded file
+          type: object
+          unevaluatedProperties: false
+          properties:
+            total:
+              description: Total number of data rows present in the uploaded file
+              type: integer
+              minimum: 0
+              example: 5973
+            skipped:
+              description: Number of rows skipped while processing the uploaded file
+              type: integer
+              minimum: 0
+              example: 1339
+        warnings:
+          description: Warnings that occurred during file processing and led to row skipping
+          type: array
+          items:
+            type: object
+            unevaluatedProperties: false
+            required:
+            - details
+            - count
+            properties:
+              details:
+                type: string
+                description: An exact description of the issue
+                example: Could not parse value of type LONG
+              count:
+                type: integer
+                minimum: 1
+                description: Number of rows in the file that were skipped due to this warning
+                example: 22
+              example_rows:
+                type: array
+                description: Up to 5 examples of the rows that were skipped due to this warning
+                items:
+                  type: string
+                  example: 2025-12-03,LOC01,LOC02,,-6.0,CS,-6.0,CS,REF001,Invoice,TYPE1,CAT1,ORD001,ID001,SO
+      required:
+      - title
+      - timestamp
+    RequestError:
+      type: object
+      unevaluatedProperties: false
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      properties:
+        type:
+          type: string
+          description: Error type description
+          example: ValidationError
+        title:
+          type: string
+          description: Error general title
+          example: Request parameters validation error
+        status:
+          type: integer
+          description: Response code
+          example: 400
+        detail:
+          type: string
+          description: Detailed error description
+          example: One or more errors occurred while validating request parameters
+        instance:
+          type: string
+          format: uri-reference
+          description: A URI reference that identifies the specific occurrence of the problem
+          example: /api/v1/example-customer/events/file?env=
+        errors:
+          description: An array of validation errors in case there were any
+          type: array
+          items:
+            type: object
+            unevaluatedProperties: false
+            required:
+            - parameter
+            - reason
+            properties:
+              parameter:
+                type: string
+                description: The name of the parameter which failed validation
+                example: env
+              reason:
+                type: string
+                description: Validation error message
+                example: env must be at least 1 character in length
     _links:
       required:
       - self
@@ -870,85 +938,17 @@ components:
                     type: string
                     format: uri-reference
                     example: /api/v1/example-customer/events/file
-    event:
+    error:
       unevaluatedProperties: false
       properties:
         title:
-          description: Textual representation of the event
+          description: Textual representation of the event during which the error has occurred
           type: string
-          enum:
-          - File received
-          - File preparation started
-          - File preparation completed
-          - File is ready for processing
-          - File import started
-          - File import completed
-          - Export file created
-          - Export file ready for preparation
-          - Export file uploaded to customer-facing storage
-          example: File received
-        timestamp:
-          description: Time of the last file operation at this step
+          example: File preparation started
+        details:
+          description: Critical error text
           type: string
-          format: date-time
-          example: '2025-12-04T14:11:48Z'
-        file_rows:
-          description: Information about individual data rows in the uploaded file
-          type: object
-          unevaluatedProperties: false
-          properties:
-            total:
-              description: Total number of data rows present in the uploaded file
-              type: integer
-              minimum: 0
-              example: 5973
-            skipped:
-              description: Number of rows skipped while processing the uploaded file
-              type: integer
-              minimum: 0
-              example: 1339
-        warnings:
-          description: Warnings that occurred during file processing and led to row skipping
-          type: array
-          items:
-            type: object
-            unevaluatedProperties: false
-            required:
-            - details
-            - count
-            properties:
-              details:
-                type: string
-                description: An exact description of the issue
-                example: Could not parse value of type LONG
-              count:
-                type: integer
-                minimum: 1
-                description: Number of rows in the file that were skipped due to this warning
-                example: 22
-              example_rows:
-                type: array
-                description: Up to 5 examples of the rows that were skipped due to this warning
-                items:
-                  type: string
-                  example: 2025-12-03,LOC01,LOC02,,-6.0,CS,-6.0,CS,REF001,Invoice,TYPE1,CAT1,ORD001,ID001,SO
-      required:
-      - title
-      - timestamp
-    meta:
-      required:
-      - customer
-      - version
-      unevaluatedProperties: false
-      properties:
-        customer:
-          type: string
-          description: Customer identifier
-          example: example-customer
-        version:
-          type: string
-          description: monitoring-api service version
-          example: v1
+          example: The file you are looking for may have been moved or deleted
   securitySchemes:
     oauth2:
       type: oauth2
