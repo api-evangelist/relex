@@ -335,20 +335,55 @@ paths:
       - oauth2: []
 components:
   schemas:
-    meta:
-      required:
-      - customer
-      - version
+    RequestError:
+      type: object
       unevaluatedProperties: false
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
       properties:
-        customer:
+        type:
           type: string
-          description: Customer identifier
-          example: example-customer
-        version:
+          description: Error type description
+          example: ValidationError
+        title:
           type: string
-          description: monitoring-api service version
-          example: v1
+          description: Error general title
+          example: Request parameters validation error
+        status:
+          type: integer
+          description: Response code
+          example: 400
+        detail:
+          type: string
+          description: Detailed error description
+          example: One or more errors occurred while validating request parameters
+        instance:
+          type: string
+          format: uri-reference
+          description: A URI reference that identifies the specific occurrence of the problem
+          example: /api/v1/example-customer/events/file?env=
+        errors:
+          description: An array of validation errors in case there were any
+          type: array
+          items:
+            type: object
+            unevaluatedProperties: false
+            required:
+            - parameter
+            - reason
+            properties:
+              parameter:
+                type: string
+                description: The name of the parameter which failed validation
+                example: env
+              reason:
+                type: string
+                description: Validation error message
+                example: env must be at least 1 character in length
     JobEventResult:
       description: A complete description of all the requested job events
       unevaluatedProperties: false
@@ -637,82 +672,20 @@ components:
       required:
       - title
       - timestamp
-    RequestError:
-      type: object
-      unevaluatedProperties: false
+    meta:
       required:
-      - type
-      - title
-      - status
-      - detail
-      - instance
-      properties:
-        type:
-          type: string
-          description: Error type description
-          example: ValidationError
-        title:
-          type: string
-          description: Error general title
-          example: Request parameters validation error
-        status:
-          type: integer
-          description: Response code
-          example: 400
-        detail:
-          type: string
-          description: Detailed error description
-          example: One or more errors occurred while validating request parameters
-        instance:
-          type: string
-          format: uri-reference
-          description: A URI reference that identifies the specific occurrence of the problem
-          example: /api/v1/example-customer/events/file?env=
-        errors:
-          description: An array of validation errors in case there were any
-          type: array
-          items:
-            type: object
-            unevaluatedProperties: false
-            required:
-            - parameter
-            - reason
-            properties:
-              parameter:
-                type: string
-                description: The name of the parameter which failed validation
-                example: env
-              reason:
-                type: string
-                description: Validation error message
-                example: env must be at least 1 character in length
-    _links:
-      required:
-      - self
-      type: object
+      - customer
+      - version
       unevaluatedProperties: false
-      description: Pagination as per the HAL standard
       properties:
-        next:
-          properties:
-            href:
-              type: string
-              format: uri-reference
-              description: Next page link
-              example: /api/v1/example-customer/events/file?page=2
-          type: object
-          unevaluatedProperties: false
-          description: Next page link container, present only if next page has data
-        self:
-          properties:
-            href:
-              type: string
-              format: uri-reference
-              description: Self link
-              example: /api/v1/example-customer/events/file
-          type: object
-          unevaluatedProperties: false
-          description: Self link container, always present
+        customer:
+          type: string
+          description: Customer identifier
+          example: example-customer
+        version:
+          type: string
+          description: monitoring-api service version
+          example: v1
     FileEventResult:
       description: A complete description of all the requested file events
       unevaluatedProperties: false
@@ -938,6 +911,33 @@ components:
                     type: string
                     format: uri-reference
                     example: /api/v1/example-customer/events/file
+    _links:
+      required:
+      - self
+      type: object
+      unevaluatedProperties: false
+      description: Pagination as per the HAL standard
+      properties:
+        next:
+          properties:
+            href:
+              type: string
+              format: uri-reference
+              description: Next page link
+              example: /api/v1/example-customer/events/file?page=2
+          type: object
+          unevaluatedProperties: false
+          description: Next page link container, present only if next page has data
+        self:
+          properties:
+            href:
+              type: string
+              format: uri-reference
+              description: Self link
+              example: /api/v1/example-customer/events/file
+          type: object
+          unevaluatedProperties: false
+          description: Self link container, always present
     error:
       unevaluatedProperties: false
       properties:
